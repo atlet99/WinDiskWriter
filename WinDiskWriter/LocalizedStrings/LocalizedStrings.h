@@ -20,6 +20,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 + (NSString *)alertButtonTitleRetryOperation;
 
++ (NSString *)errorTextRawWriteVerificationFailure;
+
 /// @brief Do not forget to properly remove the device to avoid data corruption.
 + (NSString *)alertSubtitleImageWritingSuccess;
 

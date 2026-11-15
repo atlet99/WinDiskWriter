@@ -5,6 +5,7 @@
 
 "ALERT_BUTTON_TITLE_STOP_WRITING" = "Stop Writing";
 "ALERT_BUTTON_TITLE_RETRY_OPERATION" = "Retry";
+"ERROR_TEXT_RAW_WRITE_VERIFICATION_FAILURE" = "Raw write verification failed: the image edges on the drive do not match the source.";
 
 
 "ALERT_SUBTITLE_IMAGE_WRITING_SUCCESS" = "Do not forget to properly remove the device to avoid data corruption.";

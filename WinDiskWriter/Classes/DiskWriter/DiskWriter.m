@@ -1012,6 +1012,70 @@ postLegacyBootloaderInstall:
     // Make sure the OS pushes everything to the device before declaring victory.
     fflush(destination);
     fsync(fileno(destination));
+
+    // Fix for TechUnRestricted/windiskwriter#75: raw writes have no per-file
+    // verification trail. Compare the first and last megabyte instead — that is
+    // where boot-breaking truncation or stale device content shows up, and it
+    // costs a couple of megabytes of reads instead of re-reading the whole drive.
+    {
+        const uint64_t edgeVerifySize = 1024 * 1024;
+        uint64_t compareSize = imageFile.size < edgeVerifySize ? imageFile.size : edgeVerifySize;
+        BOOL edgesVerified = YES;
+        NSError *verifyError = NULL;
+
+        void *sourceEdge = malloc(compareSize);
+        void *deviceEdge = malloc(compareSize);
+
+        if (sourceEdge == NULL || deviceEdge == NULL) {
+            free(sourceEdge);
+            free(deviceEdge);
+            edgesVerified = NO;
+            verifyError = [NSError errorWithStringValue: [LocalizedStrings errorTextAllocateMemoryBufferFailure]];
+        }
+
+        if (edgesVerified) {
+            // Head of the image.
+            fseek(source, 0, SEEK_SET);
+            fseek(destination, 0, SEEK_SET);
+
+            if (fread(sourceEdge, 1, compareSize, source) != compareSize ||
+                fread(deviceEdge, 1, compareSize, destination) != compareSize ||
+                memcmp(sourceEdge, deviceEdge, compareSize) != 0) {
+                edgesVerified = NO;
+                verifyError = [NSError errorWithStringValue: [LocalizedStrings errorTextRawWriteVerificationFailure]];
+            }
+        }
+
+        if (edgesVerified && imageFile.size > compareSize) {
+            // Tail of the image.
+            fseek(source, (long)(imageFile.size - compareSize), SEEK_SET);
+            fseek(destination, (long)(imageFile.size - compareSize), SEEK_SET);
+
+            if (fread(sourceEdge, 1, compareSize, source) != compareSize ||
+                fread(deviceEdge, 1, compareSize, destination) != compareSize ||
+                memcmp(sourceEdge, deviceEdge, compareSize) != 0) {
+                edgesVerified = NO;
+                verifyError = [NSError errorWithStringValue: [LocalizedStrings errorTextRawWriteVerificationFailure]];
+            }
+        }
+
+        free(sourceEdge);
+        free(deviceEdge);
+
+        if (!edgesVerified) {
+            fclose(source);
+            fclose(destination);
+
+            callback(imageFile, bytesWritten, DWOperationTypeWriteRawImage, DWOperationResultFailure, verifyError);
+
+            if (error) {
+                *error = verifyError;
+            }
+
+            return NO;
+        }
+    }
+
     fclose(source);
     fclose(destination);
 

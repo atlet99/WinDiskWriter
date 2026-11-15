@@ -22,6 +22,10 @@
     return NSLocalizedString(@"ALERT_BUTTON_TITLE_RETRY_OPERATION", NULL);
 }
 
++ (NSString *)errorTextRawWriteVerificationFailure {
+    return NSLocalizedString(@"ERROR_TEXT_RAW_WRITE_VERIFICATION_FAILURE", NULL);
+}
+
 + (NSString *)alertSubtitleImageWritingSuccess {
     return NSLocalizedString(@"ALERT_SUBTITLE_IMAGE_WRITING_SUCCESS", NULL);
 }

@@ -5,6 +5,7 @@
 
 "ALERT_BUTTON_TITLE_STOP_WRITING" = "Остановить запись";
 "ALERT_BUTTON_TITLE_RETRY_OPERATION" = "Повторить";
+"ERROR_TEXT_RAW_WRITE_VERIFICATION_FAILURE" = "Проверка сырой записи не пройдена: края образа на диске не совпадают с исходником.";
 
 
 "ALERT_SUBTITLE_IMAGE_WRITING_SUCCESS" = "Не забудьте правильно извлечь устройство, чтобы избежать повреждения данных.";

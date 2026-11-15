@@ -87,6 +87,7 @@
 "PLACEHOLDER_REASON" = "(Reason: %@)";
 "ALERT_BUTTON_TITLE_STOP_WRITING" = "Stop Writing";
 "ALERT_BUTTON_TITLE_RETRY_OPERATION" = "Retry";
+"ERROR_TEXT_RAW_WRITE_VERIFICATION_FAILURE" = "Raw write verification failed: the image edges on the drive do not match the source.";
 "ALERT_BUTTON_TITLE_SKIP_FILE" = "Skip File";
 "LOGVIEW_ROW_TITLE_CLEARING_DEVICE_PICKER_LIST" = "Clearing the device picker list.";
 "LOGVIEW_ROW_PARTIAL_TITLE_FOUND_DEVICES" = "Found devices";
