@@ -33,6 +33,8 @@ NS_ASSUME_NONNULL_BEGIN
 /// @brief Connect a compatible USB device and click on the Update button.
 + (NSString *)alertSubtitlePressUpdateButton;
 
++ (NSString *)alertSubtitleLargeDriveSelected;
+
 /// @brief This operation will clear all Application Data for the '%@' user.
 + (NSString *)alertSubtitlePromptResetSettingsWithArgument1:(id)argument1;
 

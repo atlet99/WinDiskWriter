@@ -595,7 +595,19 @@ WriteExitForce();                     \
     
     NSAlert *alert = [[NSAlert alloc] init];
     [alert setMessageText: [LocalizedStrings alertTitlePromptStartProcess]];
-    [alert setInformativeText: [LocalizedStrings alertSubtitlePromptStartProcess]];
+
+    NSMutableString *startPromptSubtitle = [[LocalizedStrings alertSubtitlePromptStartProcess] mutableCopy];
+
+    // Fix for TechUnRestricted/windiskwriter#35: a drive far larger than any
+    // installer media is likely not a dedicated USB stick — warn before wiping.
+    DiskInfo *startPromptSelectedDiskInfo = [(IdentifiableMenuItem *)devicePickerView.selectedItem diskInfo];
+    const UInt64 largeDriveWarningThreshold = 256ULL * 1024 * 1024 * 1024;
+
+    if (startPromptSelectedDiskInfo.mediaSize.unsignedLongLongValue > largeDriveWarningThreshold) {
+        [startPromptSubtitle appendFormat: @"\n\n%@", [LocalizedStrings alertSubtitleLargeDriveSelected]];
+    }
+
+    [alert setInformativeText: startPromptSubtitle];
 
     [alert addButtonWithTitle: [LocalizedStrings buttonTitleStart]];
     [alert addButtonWithTitle: [LocalizedStrings buttonTitleCancel]];

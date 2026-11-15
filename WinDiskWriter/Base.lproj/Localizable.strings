@@ -2,6 +2,7 @@
 "ALERT_SUBTITLE_PATH_DOES_NOT_EXIST" = "The Path to the Image or Folder you entered does not exist.";
 "ALERT_SUBTITLE_PATH_FIELD_IS_EMPTY" = "The path to the Windows Image or Directory was not specified.";
 "ALERT_SUBTITLE_PRESS_UPDATE_BUTTON" = "Connect a compatible USB device and click on the Update button.";
+"ALERT_SUBTITLE_LARGE_DRIVE_SELECTED" = "Warning: the selected drive is larger than 256 GB — make sure it is really the drive you want to erase.";
 "ALERT_SUBTITLE_STOP_PROCESS" = "You will need to wait until the last file finish the copying.";
 "ALERT_TITLE_BSD_DEVICE_INFO_IS_OUTDATED_OR_INVALID" = "The information about this device is outdated or invalid.";
 "ALERT_TITLE_BSD_DEVICE_IS_NO_LONGER_AVAILABLE" = "Chosen Device is no longer available.";

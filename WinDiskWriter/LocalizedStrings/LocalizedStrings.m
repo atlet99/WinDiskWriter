@@ -38,6 +38,10 @@
     return NSLocalizedString(@"ALERT_SUBTITLE_PRESS_UPDATE_BUTTON", NULL);
 }
 
++ (NSString *)alertSubtitleLargeDriveSelected {
+    return NSLocalizedString(@"ALERT_SUBTITLE_LARGE_DRIVE_SELECTED", NULL);
+}
+
 + (NSString *)alertSubtitlePromptResetSettingsWithArgument1:(id)argument1 {
     NSString *unformattedString = NSLocalizedString(@"ALERT_SUBTITLE_PROMPT_RESET_SETTINGS", NULL);
     return [NSString stringWithFormat: unformattedString, argument1];

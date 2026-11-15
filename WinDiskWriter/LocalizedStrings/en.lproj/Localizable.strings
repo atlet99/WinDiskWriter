@@ -19,6 +19,7 @@
 
 
 "ALERT_SUBTITLE_PRESS_UPDATE_BUTTON" = "Connect a compatible USB device and click on the Update button.";
+"ALERT_SUBTITLE_LARGE_DRIVE_SELECTED" = "Warning: the selected drive is larger than 256 GB — make sure it is really the drive you want to erase.";
 
 
 "ALERT_SUBTITLE_PROMPT_RESET_SETTINGS" = "This operation will clear all Application Data for the '%@' user.";
