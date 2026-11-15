@@ -29,6 +29,12 @@
 <h2 align="center">Windows USB Disk Creator for macOS</h2>
 
 <div align="center">
+  <pre style="display: inline-block; text-align: left;">
+    ℹ️ <b>Note:</b> WinDiskWriter is a <b>macOS application</b> (.app), it runs on Mac computers only.
+    There is no Windows (.exe) version — it creates bootable Windows installers <b>from</b> macOS.</pre>
+</div>
+
+<div align="center">
   <pre style="display: inline-block; text-align: center;">
     ⚠️ <b>WARNING:</b> This project ONLY has a GitHub page! ⚠️
     All other websites are <b>FAKE</b>. 
