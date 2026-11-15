@@ -121,3 +121,6 @@ Dependencies/
 /*.gcno
 **/xcshareddata/WorkspaceSettings.xcsettings
 
+
+# Hidden local working notes
+.issue-list-docs.md
