@@ -62,18 +62,18 @@
         return NO;
     }
     
-    NSString *plistLoadErrorDescription;
+    NSError *plistLoadError = NULL;
     NSDictionary *plist = [NSPropertyListSerialization
-                           propertyListFromData: commandLineData.standardData
-                           mutabilityOption: NSPropertyListImmutable
+                           propertyListWithData: commandLineData.standardData
+                           options: NSPropertyListImmutable
                            format: NULL
-                           errorDescription: &plistLoadErrorDescription];
-    
+                           error: &plistLoadError];
+
     if (plist == NULL) {
         if (error) {
             *error = [NSError errorWithStringValue: [LocalizedStrings errorTextCantParseHdiutilOutput]];
         }
-        
+
         return NO;
     }
     
