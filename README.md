@@ -235,15 +235,6 @@ With this USB drive, you can install and enjoy <strong>Windows</strong> on your 
    </li>
   <br>
    <li>
-      🗜 <strong>Add support for splitting install.esd (compressed system image) files</strong><br>
-         <sub>
-           Some Windows ISOs, (usually repacks) use .esd system images for better compression.<br>
-           But sometimes, even a .esd file is too large to fit into FAT32 partitions.<br>
-           Right now, WinDiskWriter can only split install.wim images. Splitting .esd requires wimlib to be updated.
-         </sub>
-   </li>
-  <br>
-   <li>
       💻 <strong>Add support for 32-bit Macs</strong><br>
       <sub>
         Right now, you can only use WinDiskWriter on Intel x64 / Apple silicon Mac computers.<br>
@@ -253,26 +244,49 @@ With this USB drive, you can install and enjoy <strong>Windows</strong> on your 
    </li>
   <br>
    <li>
-      📝 <strong>Implement a feature that allows adding a custom ei.cfg</strong><br>
-         <sub>
-           This feature will allow users to select the Windows edition of their choice, regardless of the ACPI SLIC configuration.
-         </sub>
-   </li>
-  <br>
-   <li>
-      🌐 <strong>Implement a feature that allows to skip the online account requirement from Windows 11 22H2+</strong><br>
-         <sub>
-           This feature will allow users to skip the requirement for signing in to their Microsoft Account on the install stage.<br>
-           Since this feature isn't implemented, use "<strong>OOBE/BYPASSNRO</strong>" by pressing Shift+F10 on the Microsoft Account login stage.
-         </sub>
-   </li>
-  <br>
-   <li>
       🎨 <strong>Resolve UI drawing issues on Mac OS X Mavericks 10.9 and lower</strong><br>
          <sub>
            There are some UI drawing issues on some older Mac OS X versions due to different behaviour of some system views.<br>
            It’s not critical at all, and it doesn’t affect functionality.
          </sub>
+   </li>
+</ul>
+
+<h2>Recently Added</h2>
+<ul>
+   <li>
+      ⬇️ <strong>Download official Windows ISOs</strong><br>
+        <sub>
+          Windows 11, Windows 10 22H2 and UEFI Shell images straight from Microsoft's servers — no third-party sites involved.
+        </sub>
+   </li>
+  <br>
+   <li>
+      🛠 <strong>Hardware requirement bypasses for Windows 11 24H2+</strong><br>
+        <sub>
+          TPM, Secure Boot, RAM, CPU and storage checks are bypassed from inside the Setup boot image, plus optional BitLocker device-encryption and data-collection disabling.
+        </sub>
+   </li>
+  <br>
+   <li>
+      🗂 <strong>Split install.esd images</strong><br>
+        <sub>
+          ESD-compressed images larger than 4 GB are split for FAT32 just like regular .wim files.
+        </sub>
+   </li>
+  <br>
+   <li>
+      ✅ <strong>Write verification and image checksums</strong><br>
+        <sub>
+          Written files are verified after the copy loop, and the selected image's SHA-256 is logged before writing starts.
+        </sub>
+   </li>
+  <br>
+   <li>
+      💿 <strong>Write any bootable image (raw mode)</strong><br>
+        <sub>
+          Non-Windows images — Linux ISOs and the like — are written byte-for-byte onto the drive.
+        </sub>
    </li>
 </ul>
 
