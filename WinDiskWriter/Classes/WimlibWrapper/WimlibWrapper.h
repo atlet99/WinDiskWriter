@@ -56,7 +56,7 @@ typedef NS_ENUM(NSInteger, WimLibWrapperCPUArch) {
 - (BOOL)applyChanges;
 
 - (enum wimlib_error_code)splitWithDestinationDirectoryPath: (NSString *)destinationDirectoryPath
-                                        maxSliceSizeInBytes: (UInt64 *)maxSliceSizeInBytes
+                                        maxSliceSizeInBytes: (UInt64)maxSliceSizeInBytes
                                             progressHandler: (wimlib_progress_func_t _Nullable)progressHandler
                                                     context: (void *_Nullable)context;
 
@@ -71,7 +71,7 @@ destinationDirectory: (NSString *)destinationDirectory
 typedef BOOL (^WimLibWrapperSplitImageCallback)(uint32_t totalPartsCount, uint32 currentPartNumber, uint64 bytesWritten, uint64 bytesTotal);
 
 - (WimlibWrapperResult)splitWithDestinationDirectoryPath: (NSString *)destinationDirectoryPath
-                                     maxSliceSizeInBytes: (UInt64 *)maxSliceSizeInBytes
+                                     maxSliceSizeInBytes: (UInt64)maxSliceSizeInBytes
                                                 callback: (WimLibWrapperSplitImageCallback)callback;
 
 @end

@@ -150,7 +150,7 @@
 }
 
 - (enum wimlib_error_code)splitWithDestinationDirectoryPath: (NSString *)destinationDirectoryPath
-                                        maxSliceSizeInBytes: (UInt64 *)maxSliceSizeInBytes
+                                        maxSliceSizeInBytes: (UInt64)maxSliceSizeInBytes
                                             progressHandler: (wimlib_progress_func_t _Nullable)progressHandler
                                                     context: (void *_Nullable)context {
     if (currentWIM == NULL) {
@@ -199,7 +199,7 @@ enum wimlib_progress_status defaultSplitProgress(enum wimlib_progress_msg msg, u
 }
 
 - (WimlibWrapperResult)splitWithDestinationDirectoryPath: (NSString *)destinationDirectoryPath
-                                     maxSliceSizeInBytes: (UInt64 *)maxSliceSizeInBytes
+                                     maxSliceSizeInBytes: (UInt64)maxSliceSizeInBytes
                                                 callback: (WimLibWrapperSplitImageCallback)callback {
     
     WimlibSplitInfo *wimlibSplitInfo = [[WimlibSplitInfo alloc] initWithCallback: callback];

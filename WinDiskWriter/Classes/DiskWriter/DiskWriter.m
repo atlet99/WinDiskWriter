@@ -502,7 +502,7 @@ goto cleanup;                                                                   
     // Splitting install.wim file in order to fit into FAT32 partition
     if (requiresSplitting) {
         UInt8 partsCount = ceil((double)dwFile.size / (double)FAT32_MAX_FILE_SIZE);
-        UInt32 maxSliceSize = dwFile.size / partsCount;
+        UInt64 maxSliceSize = dwFile.size / partsCount;
         
         CallbackHandlerWithCleanup(dwFile, 0, DWOperationTypeSplitWindowsImage, DWOperationResultStart, NULL);
         
