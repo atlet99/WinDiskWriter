@@ -217,6 +217,14 @@ NS_ASSUME_NONNULL_BEGIN
 
 + (NSString *)logviewRowTitleRawImageDetected;
 
++ (NSString *)msISOStatusFetchingDownloadLinks;
+
++ (NSString *)msISOStatusDownloadingImage;
+
++ (NSString *)buttonTitleDownloadISO;
+
++ (NSString *)msISOStatusImageDownloaded;
+
 + (NSString *)progressTitleWriteRawImage;
 
 /// @brief Add support for older firmwares that don't support booting from EFI.

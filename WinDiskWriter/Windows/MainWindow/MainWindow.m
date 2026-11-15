@@ -54,6 +54,7 @@ WriteExitForce();                     \
     /* Initialized in -setupViews: */
     TextInputView *windowsImageInputView;
     ButtonView *chooseWindowsImageButtonView;
+    ButtonView *downloadISOButtonView;
     
     PickerView *devicePickerView;
     ButtonView *updateDeviceListButtonView;
@@ -170,10 +171,18 @@ WriteExitForce();                     \
             
             chooseWindowsImageButtonView = [[ButtonView alloc] init]; {
                 [isoPickerHorizontalLayout addView:chooseWindowsImageButtonView minWidth:80 maxWidth:100 minHeight:0 maxHeight:INFINITY];
-                
+
                 [chooseWindowsImageButtonView setTitle: [LocalizedStrings buttonTitleChoose]];
                 [chooseWindowsImageButtonView setTarget: self];
                 [chooseWindowsImageButtonView setAction: @selector(chooseImageAction)];
+            }
+
+            downloadISOButtonView = [[ButtonView alloc] init]; {
+                [isoPickerHorizontalLayout addView:downloadISOButtonView minWidth:80 maxWidth:130 minHeight:0 maxHeight:INFINITY];
+
+                [downloadISOButtonView setTitle: [LocalizedStrings buttonTitleDownloadISO]];
+                [downloadISOButtonView setTarget: self];
+                [downloadISOButtonView setAction: @selector(downloadISOAction)];
             }
         }
     }
@@ -1279,6 +1288,42 @@ WriteExitForce();                     \
         WriteExitForce();
     });
     
+}
+
+// Downloads the current official Windows 11 ISO straight from Microsoft's
+// software-download-connector API into ~/Downloads, then fills the image path.
+- (void)downloadISOAction {
+    [downloadISOButtonView setEnabled: NO];
+
+    NSString *locale = [[[NSLocale currentLocale] localeIdentifier] lowercaseString];
+    locale = [locale stringByReplacingOccurrencesOfString: @"_" withString: @"-"];
+
+    [logsView appendRow: [LocalizedStrings msISOStatusFetchingDownloadLinks] logType: ASLogTypeLog];
+
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+        [HelperFunctions downloadOfficialWindows11ISOWithLocale: locale
+                                                 statusCallback: ^(NSString * _Nonnull statusText) {
+            [self->logsView appendRow: statusText logType: ASLogTypeLog];
+        }
+                                                     completion: ^(NSString * _Nullable downloadedISOPath, NSError * _Nullable error) {
+            [self->downloadISOButtonView setEnabled: YES];
+
+            if (error != NULL) {
+                [self displayWarningAlertWithTitle: [LocalizedStrings alertTitleCheckDataCorrectness]
+                                          subtitle: error.stringValue
+                                              icon: NSImageNameCaution];
+
+                [self->logsView appendRow: error.stringValue logType: ASLogTypeFailure];
+
+                return;
+            }
+
+            [self->windowsImageInputView setStringValue: downloadedISOPath];
+
+            [self->logsView appendRow: [LocalizedStrings msISOStatusImageDownloaded] logType: ASLogTypeSuccess];
+            [self->logsView appendRow: downloadedISOPath logType: ASLogTypeLog];
+        }];
+    });
 }
 
 - (void)chooseImageAction {

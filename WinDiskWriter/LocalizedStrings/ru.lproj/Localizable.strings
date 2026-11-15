@@ -199,6 +199,10 @@
 "ERROR_TEXT_WRITTEN_FILE_VERIFICATION_FAILURE" = "Проверка записанного файла не пройдена: %@.";
 "LOGVIEW_ROW_TITLE_RAW_IMAGE_DETECTED" = "Обнаружен не-Windows образ — он будет записан байт-в-байт (сырой режим).";
 "PROGRESS_TITLE_WRITE_RAW_IMAGE" = "Запись сырого образа";
+"MSISO_STATUS_FETCHING_DOWNLOAD_LINKS" = "Получение ссылок на загрузку образа…";
+"MSISO_STATUS_DOWNLOADING_IMAGE" = "Загрузка официального образа…";
+"BUTTON_TITLE_DOWNLOAD_ISO" = "Скачать ISO";
+"MSISO_STATUS_IMAGE_DOWNLOADED" = "Официальный образ скачан и выбран.";
 
 "DADISK_ERROR_TEXT_BAD_ARGUMENT" = "В функцию передан некорректный аргумент.";
 

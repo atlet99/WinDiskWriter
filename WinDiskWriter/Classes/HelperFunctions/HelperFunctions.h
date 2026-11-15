@@ -67,6 +67,17 @@ NS_ASSUME_NONNULL_BEGIN
 
 + (NSString * _Nullable)sha256ForFileAtPath: (NSString * _Nonnull)path;
 
+typedef void(^MSISOStatusCallback)(NSString * _Nonnull statusText);
+typedef void(^MSISOCompletionCallback)(NSString * _Nullable downloadedISOPath, NSError * _Nullable error);
+
+// Fetches the current official Windows 11 (Home/Pro/Edu) x64 ISO download link
+// from Microsoft's software-download-connector API and downloads it into
+// ~/Downloads. All HTTP work happens on a background queue; statusCallback is
+// always invoked on the main queue.
++ (void)downloadOfficialWindows11ISOWithLocale: (NSString * _Nonnull)locale
+                                statusCallback: (MSISOStatusCallback _Nonnull)statusCallback
+                                    completion: (MSISOCompletionCallback _Nonnull)completion;
+
 @end
 
 NS_ASSUME_NONNULL_END

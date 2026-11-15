@@ -305,6 +305,22 @@
     return NSLocalizedString(@"PROGRESS_TITLE_WRITE_RAW_IMAGE", NULL);
 }
 
++ (NSString *)msISOStatusFetchingDownloadLinks {
+    return NSLocalizedString(@"MSISO_STATUS_FETCHING_DOWNLOAD_LINKS", NULL);
+}
+
++ (NSString *)msISOStatusDownloadingImage {
+    return NSLocalizedString(@"MSISO_STATUS_DOWNLOADING_IMAGE", NULL);
+}
+
++ (NSString *)buttonTitleDownloadISO {
+    return NSLocalizedString(@"BUTTON_TITLE_DOWNLOAD_ISO", NULL);
+}
+
++ (NSString *)msISOStatusImageDownloaded {
+    return NSLocalizedString(@"MSISO_STATUS_IMAGE_DOWNLOADED", NULL);
+}
+
 + (NSString *)checkboxviewTooltipInstallLegacyBootSector {
     return NSLocalizedString(@"CHECKBOXVIEW_TOOLTIP_INSTALL_LEGACY_BOOT_SECTOR", NULL);
 }

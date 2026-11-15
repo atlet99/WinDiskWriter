@@ -199,6 +199,10 @@
 "ERROR_TEXT_WRITTEN_FILE_VERIFICATION_FAILURE" = "Written file verification failed: %@.";
 "LOGVIEW_ROW_TITLE_RAW_IMAGE_DETECTED" = "Non-Windows image detected — it will be written byte-for-byte (raw mode).";
 "PROGRESS_TITLE_WRITE_RAW_IMAGE" = "Write Raw Image";
+"MSISO_STATUS_FETCHING_DOWNLOAD_LINKS" = "Fetching ISO download links…";
+"MSISO_STATUS_DOWNLOADING_IMAGE" = "Downloading the official image…";
+"BUTTON_TITLE_DOWNLOAD_ISO" = "Download ISO";
+"MSISO_STATUS_IMAGE_DOWNLOADED" = "Official image downloaded and selected.";
 
 "DADISK_ERROR_TEXT_BAD_ARGUMENT" = "An invalid argument was passed to the function.";
 
