@@ -201,6 +201,10 @@ NS_ASSUME_NONNULL_BEGIN
 
 + (NSString *)checkboxviewTooltipAddEiCfgFile;
 
++ (NSString *)checkboxviewTitleSkipOnlineAccount;
+
++ (NSString *)checkboxviewTooltipSkipOnlineAccount;
+
 /// @brief Add support for older firmwares that don't support booting from EFI.
 + (NSString *)checkboxviewTooltipInstallLegacyBootSector;
 

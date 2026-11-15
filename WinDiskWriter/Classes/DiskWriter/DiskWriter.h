@@ -48,6 +48,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, readwrite) BOOL patchInstallerRequirements;
 @property (nonatomic, readwrite) BOOL installLegacyBoot;
 @property (nonatomic, readwrite) BOOL addEiCfgFile;
+@property (nonatomic, readwrite) BOOL addUnattendFile;
 
 - (instancetype)init NS_UNAVAILABLE;
 

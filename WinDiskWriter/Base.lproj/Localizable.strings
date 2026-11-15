@@ -44,6 +44,9 @@
 "CHECKBOXVIEW_TOOLTIP_PATCH_INSTALLER_REQUIREMENTS" = "Remove TPM, Secure Boot and RAM requirements from the installer.\n(Windows 11 only)";
 "CHECKBOXVIEW_TITLE_ADD_EI_CFG_FILE" = "Add ei.cfg (Select Windows Edition)";
 "CHECKBOXVIEW_TOOLTIP_ADD_EI_CFG_FILE" = "Add sources/ei.cfg with an empty EditionID, so Windows Setup lets you pick the edition instead of auto-installing the one locked to your PCs ACPI SLIC key.";
+"CHECKBOXVIEW_TITLE_SKIP_ONLINE_ACCOUNT" = "Skip Online Account Requirement";
+"CHECKBOXVIEW_TOOLTIP_SKIP_ONLINE_ACCOUNT" = "Add autounattend.xml that opens the local (offline) account creation dialog on Windows 11 22H2+.
+Same as pressing Shift+F10 and running OOBE\BYPASSNRO.";
 "CHECKBOXVIEW_TITLE_INSTALL_LEGACY_BOOT_SECTOR" = "Install Legacy Boot Sector";
 "CHECKBOXVIEW_TOOLTIP_INSTALL_LEGACY_BOOT_SECTOR" = "Add support for older firmwares that don't support booting from EFI.";
 "TOOLTIP_FRAMELAYOUT_FORMATTING_SECTION" = "Desired filesystem for the destination device.\n(FAT32 is the best choice for compatibility)";

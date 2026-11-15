@@ -57,6 +57,7 @@ WriteExitForce();                     \
     CheckBoxView *patchInstallerRequirementsCheckboxView;
     CheckBoxView *installLegacyBootCheckBoxView;
     CheckBoxView *addEiCfgFileCheckboxView;
+    CheckBoxView *skipOnlineAccountCheckboxView;
     NSSegmentedControl *filesystemPickerSegmentedControl;
     NSSegmentedControl *partitionSchemePickerSegmentedControl;
     
@@ -241,6 +242,15 @@ WriteExitForce();                     \
         [addEiCfgFileCheckboxView setToolTip: [LocalizedStrings checkboxviewTooltipAddEiCfgFile]];
 
         [addEiCfgFileCheckboxView setState: NSOffState];
+    }
+
+    skipOnlineAccountCheckboxView = [[CheckBoxView alloc] init]; {
+        [mainVerticalLayout addView:skipOnlineAccountCheckboxView width:INFINITY height:skipOnlineAccountCheckboxView.cell.cellSize.height];
+
+        [skipOnlineAccountCheckboxView setTitle: [LocalizedStrings checkboxviewTitleSkipOnlineAccount]];
+        [skipOnlineAccountCheckboxView setToolTip: [LocalizedStrings checkboxviewTooltipSkipOnlineAccount]];
+
+        [skipOnlineAccountCheckboxView setState: NSOffState];
     }
     
     [mainVerticalLayout addView:spacerView width:INFINITY height: 3];
@@ -992,6 +1002,7 @@ WriteExitForce();                     \
         [diskWriter setPatchInstallerRequirements: patchInstallerRequirements];
         [diskWriter setInstallLegacyBoot: installLegacyBoot];
         [diskWriter setAddEiCfgFile: self->addEiCfgFileCheckboxView.state == NSOnState];
+        [diskWriter setAddUnattendFile: self->skipOnlineAccountCheckboxView.state == NSOnState];
         
         NSError *writeError = NULL;
         
@@ -1234,6 +1245,7 @@ WriteExitForce();                     \
         [self->patchInstallerRequirementsCheckboxView setEnabled: enabledUIState];
         [self->installLegacyBootCheckBoxView setEnabled: enabledUIState];
         [self->addEiCfgFileCheckboxView setEnabled: enabledUIState];
+        [self->skipOnlineAccountCheckboxView setEnabled: enabledUIState];
         [self->windowsImageInputView setEnabled: enabledUIState];
         [self->devicePickerView setEnabled: enabledUIState];
                 

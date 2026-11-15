@@ -49,6 +49,7 @@ static const NSString *BUNDLE_BOOTLOADER_SUBDIRECTORY_NAME = @"grub4dos";
     _patchInstallerRequirements = NO;
     _installLegacyBoot = NO;
     _addEiCfgFile = NO;
+    _addUnattendFile = NO;
     
     return self;
 }
@@ -669,6 +670,43 @@ if (![self commonErrorCheckerWithError:error]) {
                             encoding: NSUTF8StringEncoding
                                error: NULL];
         }
+    }
+
+    // Fix for TechUnRestricted/windiskwriter#1: launch the local account dialog
+    // during OOBE (the current replacement for the retired OOBE\BYPASSNRO —
+    // ms-cxh:localonly opens the offline account creation form directly).
+    // Components for both architectures are included so the file works on
+    // x64 and ARM64 media alike; on Windows 10 the command is a harmless no-op.
+    if (self.addUnattendFile) {
+        NSString *unattendContent = @"<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"
+        @"<unattend xmlns=\"urn:schemas-microsoft-com:unattend\"\n"
+        @"          xmlns:wcm=\"http://schemas.microsoft.com/WMIConfig/2002/State\">\n"
+        @"    <settings pass=\"oobeSystem\">\n"
+        @"        <component name=\"Microsoft-Windows-Deployment\" processorArchitecture=\"amd64\" publicKeyToken=\"31bf3856ad364e35\" language=\"neutral\" versionScope=\"nonSxS\">\n"
+        @"            <RunSynchronous>\n"
+        @"                <RunSynchronousCommand wcm:action=\"add\">\n"
+        @"                    <Order>1</Order>\n"
+        @"                    <Description>Offer local account creation</Description>\n"
+        @"                    <CommandLine>start ms-cxh:localonly</CommandLine>\n"
+        @"                </RunSynchronousCommand>\n"
+        @"            </RunSynchronous>\n"
+        @"        </component>\n"
+        @"        <component name=\"Microsoft-Windows-Deployment\" processorArchitecture=\"arm64\" publicKeyToken=\"31bf3856ad364e35\" language=\"neutral\" versionScope=\"nonSxS\">\n"
+        @"            <RunSynchronous>\n"
+        @"                <RunSynchronousCommand wcm:action=\"add\">\n"
+        @"                    <Order>1</Order>\n"
+        @"                    <Description>Offer local account creation</Description>\n"
+        @"                    <CommandLine>start ms-cxh:localonly</CommandLine>\n"
+        @"                </RunSynchronousCommand>\n"
+        @"            </RunSynchronous>\n"
+        @"        </component>\n"
+        @"    </settings>\n"
+        @"</unattend>\n";
+
+        [unattendContent writeToFile: [self.destinationPath stringByAppendingPathComponent: @"autounattend.xml"]
+                          atomically: YES
+                           encoding: NSUTF8StringEncoding
+                              error: NULL];
     }
 
     // Trying to extract a bootloader for (x86_64 systems only. There is no need to check for x86 or ARM binaries.)

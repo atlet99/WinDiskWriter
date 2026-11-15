@@ -267,6 +267,14 @@
     return NSLocalizedString(@"CHECKBOXVIEW_TOOLTIP_ADD_EI_CFG_FILE", NULL);
 }
 
++ (NSString *)checkboxviewTitleSkipOnlineAccount {
+    return NSLocalizedString(@"CHECKBOXVIEW_TITLE_SKIP_ONLINE_ACCOUNT", NULL);
+}
+
++ (NSString *)checkboxviewTooltipSkipOnlineAccount {
+    return NSLocalizedString(@"CHECKBOXVIEW_TOOLTIP_SKIP_ONLINE_ACCOUNT", NULL);
+}
+
 + (NSString *)checkboxviewTooltipInstallLegacyBootSector {
     return NSLocalizedString(@"CHECKBOXVIEW_TOOLTIP_INSTALL_LEGACY_BOOT_SECTOR", NULL);
 }
