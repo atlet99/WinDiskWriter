@@ -191,9 +191,12 @@
 "CHECKBOXVIEW_TITLE_ADD_EI_CFG_FILE" = "Добавить ei.cfg (Выбор редакции Windows)";
 "CHECKBOXVIEW_TOOLTIP_ADD_EI_CFG_FILE" = "Добавляет sources/ei.cfg с пустым EditionID — установщик Windows предложит выбрать редакцию вместо автоустановки редакции, привязанной к ACPI SLIC-ключу вашего ПК.";
 "CHECKBOXVIEW_TITLE_SKIP_ONLINE_ACCOUNT" = "Пропустить требование онлайн-аккаунта";
-"CHECKBOXVIEW_TOOLTIP_SKIP_ONLINE_ACCOUNT" = "Добавляет autounattend.xml, который открывает диалог создания локальной (офлайн) учётной записи на Windows 11 22H2+.
-Аналогично Shift+F10 и команде OOBE\BYPASSNRO.";
-
+"CHECKBOXVIEW_TOOLTIP_SKIP_ONLINE_ACCOUNT" = "Добавляет autounattend.xml, который открывает диалог создания локальной (офлайн) учётной записи на Windows 11 22H2+.\nАналогично Shift+F10 и команде OOBE\\BYPASSNRO.";
+"LOGVIEW_ROW_TITLE_COMPUTING_IMAGE_CHECKSUM" = "Вычисление SHA-256 контрольной суммы образа…";
+"LOGVIEW_ROW_TITLE_IMAGE_CHECKSUM" = "SHA-256 образа: %@";
+"LOGVIEW_ROW_TITLE_IMAGE_CHECKSUM_FAILURE" = "Не удалось вычислить контрольную сумму образа.";
+"PROGRESS_TITLE_VERIFY_WRITTEN_FILES" = "Проверка записанных файлов";
+"ERROR_TEXT_WRITTEN_FILE_VERIFICATION_FAILURE" = "Проверка записанного файла не пройдена: %@.";
 
 "DADISK_ERROR_TEXT_BAD_ARGUMENT" = "В функцию передан некорректный аргумент.";
 

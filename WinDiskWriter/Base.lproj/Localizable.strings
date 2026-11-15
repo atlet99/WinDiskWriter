@@ -45,8 +45,12 @@
 "CHECKBOXVIEW_TITLE_ADD_EI_CFG_FILE" = "Add ei.cfg (Select Windows Edition)";
 "CHECKBOXVIEW_TOOLTIP_ADD_EI_CFG_FILE" = "Add sources/ei.cfg with an empty EditionID, so Windows Setup lets you pick the edition instead of auto-installing the one locked to your PCs ACPI SLIC key.";
 "CHECKBOXVIEW_TITLE_SKIP_ONLINE_ACCOUNT" = "Skip Online Account Requirement";
-"CHECKBOXVIEW_TOOLTIP_SKIP_ONLINE_ACCOUNT" = "Add autounattend.xml that opens the local (offline) account creation dialog on Windows 11 22H2+.
-Same as pressing Shift+F10 and running OOBE\BYPASSNRO.";
+"CHECKBOXVIEW_TOOLTIP_SKIP_ONLINE_ACCOUNT" = "Add autounattend.xml that opens the local (offline) account creation dialog on Windows 11 22H2+.\nSame as pressing Shift+F10 and running OOBE\\BYPASSNRO.";
+"LOGVIEW_ROW_TITLE_COMPUTING_IMAGE_CHECKSUM" = "Computing SHA-256 checksum of the image…";
+"LOGVIEW_ROW_TITLE_IMAGE_CHECKSUM" = "Image SHA-256: %@";
+"LOGVIEW_ROW_TITLE_IMAGE_CHECKSUM_FAILURE" = "Failed to compute image checksum.";
+"PROGRESS_TITLE_VERIFY_WRITTEN_FILES" = "Verify Written Files";
+"ERROR_TEXT_WRITTEN_FILE_VERIFICATION_FAILURE" = "Written file verification failed: %@.";
 "CHECKBOXVIEW_TITLE_INSTALL_LEGACY_BOOT_SECTOR" = "Install Legacy Boot Sector";
 "CHECKBOXVIEW_TOOLTIP_INSTALL_LEGACY_BOOT_SECTOR" = "Add support for older firmwares that don't support booting from EFI.";
 "TOOLTIP_FRAMELAYOUT_FORMATTING_SECTION" = "Desired filesystem for the destination device.\n(FAT32 is the best choice for compatibility)";
