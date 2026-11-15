@@ -203,6 +203,7 @@
 "MSISO_STATUS_DOWNLOADING_IMAGE" = "Загрузка официального образа…";
 "BUTTON_TITLE_DOWNLOAD_ISO" = "Скачать ISO";
 "MSISO_STATUS_IMAGE_DOWNLOADED" = "Официальный образ скачан и выбран.";
+"ALERT_TITLE_PROMPT_DOWNLOAD_ISO" = "Какую версию Windows скачать?";
 
 "DADISK_ERROR_TEXT_BAD_ARGUMENT" = "В функцию передан некорректный аргумент.";
 

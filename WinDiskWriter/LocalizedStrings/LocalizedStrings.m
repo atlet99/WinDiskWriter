@@ -321,6 +321,10 @@
     return NSLocalizedString(@"MSISO_STATUS_IMAGE_DOWNLOADED", NULL);
 }
 
++ (NSString *)alertTitlePromptDownloadISO {
+    return NSLocalizedString(@"ALERT_TITLE_PROMPT_DOWNLOAD_ISO", NULL);
+}
+
 + (NSString *)checkboxviewTooltipInstallLegacyBootSector {
     return NSLocalizedString(@"CHECKBOXVIEW_TOOLTIP_INSTALL_LEGACY_BOOT_SECTOR", NULL);
 }

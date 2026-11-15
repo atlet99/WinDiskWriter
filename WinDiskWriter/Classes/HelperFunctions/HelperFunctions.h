@@ -70,13 +70,15 @@ NS_ASSUME_NONNULL_BEGIN
 typedef void(^MSISOStatusCallback)(NSString * _Nonnull statusText);
 typedef void(^MSISOCompletionCallback)(NSString * _Nullable downloadedISOPath, NSError * _Nullable error);
 
-// Fetches the current official Windows 11 (Home/Pro/Edu) x64 ISO download link
-// from Microsoft's software-download-connector API and downloads it into
+// Fetches the current official Windows ISO download link for the given
+// Microsoft productEditionIds (each architecture carries its own ID) from
+// Microsoft's software-download-connector API and downloads it into
 // ~/Downloads. All HTTP work happens on a background queue; statusCallback is
 // always invoked on the main queue.
-+ (void)downloadOfficialWindows11ISOWithLocale: (NSString * _Nonnull)locale
-                                statusCallback: (MSISOStatusCallback _Nonnull)statusCallback
-                                    completion: (MSISOCompletionCallback _Nonnull)completion;
++ (void)downloadOfficialWindowsISOWithEditionIds: (NSArray<NSNumber *> * _Nonnull)editionIds
+                                          locale: (NSString * _Nonnull)locale
+                                  statusCallback: (MSISOStatusCallback _Nonnull)statusCallback
+                                      completion: (MSISOCompletionCallback _Nonnull)completion;
 
 @end
 

@@ -1290,9 +1290,29 @@ WriteExitForce();                     \
     
 }
 
-// Downloads the current official Windows 11 ISO straight from Microsoft's
+// Downloads the current official Windows ISO straight from Microsoft's
 // software-download-connector API into ~/Downloads, then fills the image path.
+// The release (Windows 11 / Windows 10) is picked through a two-button prompt.
 - (void)downloadISOAction {
+    NSAlert *releaseAlert = [[NSAlert alloc] init];
+    [releaseAlert setMessageText: [LocalizedStrings alertTitlePromptDownloadISO]];
+
+    [releaseAlert addButtonWithTitle: @"Windows 11"];
+    [releaseAlert addButtonWithTitle: @"Windows 10 22H2"];
+
+    [releaseAlert beginSheetModalForWindow: self
+                             modalDelegate: self
+                            didEndSelector: @selector(alertDownloadReleaseDidEnd:returnCode:contextInfo:)
+                               contextInfo: NULL];
+}
+
+- (void)alertDownloadReleaseDidEnd: (NSAlert *)alert
+                        returnCode: (NSInteger)returnCode
+                       contextInfo: (void *)contextInfo {
+    // Microsoft assigns each architecture its own productEditionId:
+    // 3813 = Win11 Home/Pro/Edu x64, 3816 = Win11 ARM64, 2618 = Win10 22H2 Home/Pro/Edu.
+    NSArray<NSNumber *> *editionIds = (returnCode == NSAlertSecondButtonReturn) ? @[@2618] : @[@3813, @3816];
+
     [downloadISOButtonView setEnabled: NO];
 
     NSString *locale = [[[NSLocale currentLocale] localeIdentifier] lowercaseString];
@@ -1301,8 +1321,9 @@ WriteExitForce();                     \
     [logsView appendRow: [LocalizedStrings msISOStatusFetchingDownloadLinks] logType: ASLogTypeLog];
 
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-        [HelperFunctions downloadOfficialWindows11ISOWithLocale: locale
-                                                 statusCallback: ^(NSString * _Nonnull statusText) {
+        [HelperFunctions downloadOfficialWindowsISOWithEditionIds: editionIds
+                                                           locale: locale
+                                                   statusCallback: ^(NSString * _Nonnull statusText) {
             [self->logsView appendRow: statusText logType: ASLogTypeLog];
         }
                                                      completion: ^(NSString * _Nullable downloadedISOPath, NSError * _Nullable error) {

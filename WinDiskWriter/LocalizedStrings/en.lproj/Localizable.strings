@@ -203,6 +203,7 @@
 "MSISO_STATUS_DOWNLOADING_IMAGE" = "Downloading the official image…";
 "BUTTON_TITLE_DOWNLOAD_ISO" = "Download ISO";
 "MSISO_STATUS_IMAGE_DOWNLOADED" = "Official image downloaded and selected.";
+"ALERT_TITLE_PROMPT_DOWNLOAD_ISO" = "Which Windows release do you want to download?";
 
 "DADISK_ERROR_TEXT_BAD_ARGUMENT" = "An invalid argument was passed to the function.";
 

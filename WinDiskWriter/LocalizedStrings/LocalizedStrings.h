@@ -225,6 +225,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 + (NSString *)msISOStatusImageDownloaded;
 
++ (NSString *)alertTitlePromptDownloadISO;
+
 + (NSString *)progressTitleWriteRawImage;
 
 /// @brief Add support for older firmwares that don't support booting from EFI.

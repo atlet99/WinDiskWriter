@@ -600,9 +600,10 @@ static void initializeStaticVariables() {
     return replyData != NULL;
 }
 
-+ (void)downloadOfficialWindows11ISOWithLocale: (NSString *)locale
-                                statusCallback: (MSISOStatusCallback)statusCallback
-                                    completion: (MSISOCompletionCallback)completion {
++ (void)downloadOfficialWindowsISOWithEditionIds: (NSArray<NSNumber *> *)editionIds
+                                          locale: (NSString *)locale
+                                  statusCallback: (MSISOStatusCallback)statusCallback
+                                      completion: (MSISOCompletionCallback)completion {
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
         void (^statusBlock)(NSString *text) = ^(NSString *text) {
             dispatch_async(dispatch_get_main_queue(), ^{ statusCallback(text); });
@@ -613,9 +614,9 @@ static void initializeStaticVariables() {
         NSString *chosenSessionId = NULL;
         NSString *referencedLocale = [locale lowercaseString];
 
-        // 3813 = Home/Pro/Edu x64 image, 3816 = the same for ARM64 (Microsoft
-        // assigns separate edition IDs per architecture).
-        for (NSNumber *editionId in @[@3813, @3816]) {
+        // Each architecture carries its own edition ID (e.g. 3813 = Win11
+        // Home/Pro/Edu x64, 3816 = the same for ARM64).
+        for (NSNumber *editionId in editionIds) {
             NSString *sessionId = [[NSUUID UUID] UUIDString].lowercaseString;
             NSString *instanceId = @"560dc9f3-1aa5-4a2f-b63c-9e18f8d0e175";
 
