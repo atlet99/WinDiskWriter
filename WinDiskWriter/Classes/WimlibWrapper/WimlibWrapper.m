@@ -7,6 +7,7 @@
 //
 
 #import "WimlibWrapper.h"
+#include <string.h>
 #import "CChar2DArray.h"
 #import "WimlibSplitInfo.h"
 #import "wimlib.h"
@@ -294,6 +295,37 @@ destinationDirectory: (NSString *)destinationDirectory
     BOOL applyChangesResult = [self applyChanges];
     
     return applyChangesResult ? WimlibWrapperResultSuccess : WimlibWrapperResultFailure;
+}
+
+// Fix for TechUnRestricted/windiskwriter#54 and #32: drops a file (typically a
+// windowsPE Autounattend.xml with LabConfig bypass registry commands) into a
+// WIM image — used on the written sources/boot.wim so Windows Setup itself
+// applies the hardware-check bypasses.
+- (WimlibWrapperResult)addFileAtPath: (NSString *)sourceFilePath
+                      toImageAtIndex: (UInt32)imageIndex
+                         asImagePath: (NSString *)targetImagePath {
+    WIMStruct *updateWim = NULL;
+
+    if (wimlib_open_wim([_wimPath UTF8String], WIMLIB_OPEN_FLAG_WRITE_ACCESS, &updateWim) != WIMLIB_ERR_SUCCESS) {
+        return WimlibWrapperResultFailure;
+    }
+
+    struct wimlib_update_command addCommand;
+    memset(&addCommand, 0, sizeof(addCommand));
+
+    addCommand.op = WIMLIB_UPDATE_OP_ADD;
+    addCommand.add.fs_source_path = (wimlib_tchar *)[sourceFilePath UTF8String];
+    addCommand.add.wim_target_path = (wimlib_tchar *)[targetImagePath UTF8String];
+
+    WimlibWrapperResult operationResult = WimlibWrapperResultFailure;
+
+    if (wimlib_update_image(updateWim, imageIndex, &addCommand, 1, 0) == WIMLIB_ERR_SUCCESS) {
+        operationResult = (wimlib_overwrite(updateWim, 0, 1) == WIMLIB_ERR_SUCCESS) ? WimlibWrapperResultSuccess : WimlibWrapperResultFailure;
+    }
+
+    wimlib_free(updateWim);
+
+    return operationResult;
 }
 
 - (void)dealloc {

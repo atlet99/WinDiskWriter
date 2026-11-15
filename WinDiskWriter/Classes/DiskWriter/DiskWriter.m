@@ -25,8 +25,9 @@
 
 const uint32_t FAT32_MAX_FILE_SIZE = UINT32_MAX;
 
-// 8MB Buffer for copying files with interrupt-like callback
-const uint64_t COPY_BUFFER_SIZE = 8388608;
+// 32MB Buffer for copying files with interrupt-like callback — larger chunks
+// mean fewer copies and fewer callback round-trips on slow USB volumes (#55).
+const uint64_t COPY_BUFFER_SIZE = 33554432;
 
 static const NSString *BUNDLE_BOOTLOADER_SUBDIRECTORY_NAME = @"grub4dos";
 
@@ -686,6 +687,12 @@ if (![self commonErrorCheckerWithError:error]) {
                 continue;
             }
 
+            // The patched boot.wim intentionally diverges from the source image
+            // (Autounattend.xml injected), so source-based checks do not apply.
+            if (self.patchInstallerRequirements && [currentFile.sourcePath.lowercaseString isEqualToString: @"sources/boot.wim"]) {
+                continue;
+            }
+
             NSString *absoluteDestinationFilePath = [self.destinationPath stringByAppendingPathComponent: currentFile.sourcePath];
             NSDictionary *destinationFileAttributes = [localFileManager attributesOfItemAtPath: absoluteDestinationFilePath
                                                                                          error: NULL];
@@ -718,6 +725,101 @@ if (![self commonErrorCheckerWithError:error]) {
             case DWActionSkip:
             case DWActionContinue:
                 break;
+        }
+    }
+
+    // Fix for TechUnRestricted/windiskwriter#54 and #32: the INSTALLATIONTYPE
+    // XML tweak alone stopped satisfying Windows 11 24H2+ hardware checks.
+    // Inject a windowsPE Autounattend.xml into the written sources/boot.wim
+    // (Setup image, index 2; unofficial ISOs sometimes keep it at index 1) so
+    // Windows Setup registers the LabConfig bypasses itself on every machine.
+    if (self.patchInstallerRequirements) {
+        NSString *destinationBootWimPath = [self.destinationPath stringByAppendingPathComponent: @"sources/boot.wim"];
+
+        if ([localFileManager fileExistsAtPath: destinationBootWimPath]) {
+            NSString *tempUnattendPath = [NSTemporaryDirectory() stringByAppendingPathComponent: @"WDW-Autounattend.xml"];
+
+            NSString *bypassUnattendXML = @"<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"
+            @"<unattend xmlns=\"urn:schemas-microsoft-com:unattend\">\n"
+            @"  <settings pass=\"windowsPE\">\n"
+            @"    <component name=\"Microsoft-Windows-Setup\" processorArchitecture=\"amd64\" language=\"neutral\" xmlns:wcm=\"http://schemas.microsoft.com/WMIConfig/2002/State\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" publicKeyToken=\"31bf3856ad364e35\" versionScope=\"nonSxS\">\n"
+            @"      <UserData>\n"
+            @"        <AcceptEula>true</AcceptEula>\n"
+            @"        <ProductKey>\n"
+            @"          <Key />\n"
+            @"        </ProductKey>\n"
+            @"      </UserData>\n"
+            @"      <RunSynchronous>\n"
+            @"        <RunSynchronousCommand wcm:action=\"add\">\n"
+            @"          <Order>1</Order>\n"
+            @"          <Path>reg add HKLM\\SYSTEM\\Setup\\LabConfig /v BypassTPMCheck /t REG_DWORD /d 1 /f</Path>\n"
+            @"        </RunSynchronousCommand>\n"
+            @"        <RunSynchronousCommand wcm:action=\"add\">\n"
+            @"          <Order>2</Order>\n"
+            @"          <Path>reg add HKLM\\SYSTEM\\Setup\\LabConfig /v BypassSecureBootCheck /t REG_DWORD /d 1 /f</Path>\n"
+            @"        </RunSynchronousCommand>\n"
+            @"        <RunSynchronousCommand wcm:action=\"add\">\n"
+            @"          <Order>3</Order>\n"
+            @"          <Path>reg add HKLM\\SYSTEM\\Setup\\LabConfig /v BypassRAMCheck /t REG_DWORD /d 1 /f</Path>\n"
+            @"        </RunSynchronousCommand>\n"
+            @"        <RunSynchronousCommand wcm:action=\"add\">\n"
+            @"          <Order>4</Order>\n"
+            @"          <Path>reg add HKLM\\SYSTEM\\Setup\\LabConfig /v BypassCPUCheck /t REG_DWORD /d 1 /f</Path>\n"
+            @"        </RunSynchronousCommand>\n"
+            @"        <RunSynchronousCommand wcm:action=\"add\">\n"
+            @"          <Order>5</Order>\n"
+            @"          <Path>reg add HKLM\\SYSTEM\\Setup\\LabConfig /v BypassStorageCheck /t REG_DWORD /d 1 /f</Path>\n"
+            @"        </RunSynchronousCommand>\n"
+            @"      </RunSynchronous>\n"
+            @"    </component>\n"
+            @"    <component name=\"Microsoft-Windows-Setup\" processorArchitecture=\"arm64\" language=\"neutral\" xmlns:wcm=\"http://schemas.microsoft.com/WMIConfig/2002/State\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" publicKeyToken=\"31bf3856ad364e35\" versionScope=\"nonSxS\">\n"
+            @"      <UserData>\n"
+            @"        <AcceptEula>true</AcceptEula>\n"
+            @"        <ProductKey>\n"
+            @"          <Key />\n"
+            @"        </ProductKey>\n"
+            @"      </UserData>\n"
+            @"      <RunSynchronous>\n"
+            @"        <RunSynchronousCommand wcm:action=\"add\">\n"
+            @"          <Order>1</Order>\n"
+            @"          <Path>reg add HKLM\\SYSTEM\\Setup\\LabConfig /v BypassTPMCheck /t REG_DWORD /d 1 /f</Path>\n"
+            @"        </RunSynchronousCommand>\n"
+            @"        <RunSynchronousCommand wcm:action=\"add\">\n"
+            @"          <Order>2</Order>\n"
+            @"          <Path>reg add HKLM\\SYSTEM\\Setup\\LabConfig /v BypassSecureBootCheck /t REG_DWORD /d 1 /f</Path>\n"
+            @"        </RunSynchronousCommand>\n"
+            @"        <RunSynchronousCommand wcm:action=\"add\">\n"
+            @"          <Order>3</Order>\n"
+            @"          <Path>reg add HKLM\\SYSTEM\\Setup\\LabConfig /v BypassRAMCheck /t REG_DWORD /d 1 /f</Path>\n"
+            @"        </RunSynchronousCommand>\n"
+            @"        <RunSynchronousCommand wcm:action=\"add\">\n"
+            @"          <Order>4</Order>\n"
+            @"          <Path>reg add HKLM\\SYSTEM\\Setup\\LabConfig /v BypassCPUCheck /t REG_DWORD /d 1 /f</Path>\n"
+            @"        </RunSynchronousCommand>\n"
+            @"        <RunSynchronousCommand wcm:action=\"add\">\n"
+            @"          <Order>5</Order>\n"
+            @"          <Path>reg add HKLM\\SYSTEM\\Setup\\LabConfig /v BypassStorageCheck /t REG_DWORD /d 1 /f</Path>\n"
+            @"        </RunSynchronousCommand>\n"
+            @"      </RunSynchronous>\n"
+            @"    </component>\n"
+            @"  </settings>\n"
+            @"</unattend>\n";
+
+            if ([bypassUnattendXML writeToFile: tempUnattendPath atomically: YES encoding: NSUTF8StringEncoding error: NULL]) {
+                WimlibWrapper *bootWimWrapper = [[WimlibWrapper alloc] initWithWimPath: destinationBootWimPath];
+
+                WimlibWrapperResult injectionResult = [bootWimWrapper addFileAtPath: tempUnattendPath
+                                                                     toImageAtIndex: 2
+                                                                        asImagePath: @"/Autounattend.xml"];
+
+                if (injectionResult != WimlibWrapperResultSuccess) {
+                    injectionResult = [bootWimWrapper addFileAtPath: tempUnattendPath
+                                                     toImageAtIndex: 1
+                                                        asImagePath: @"/Autounattend.xml"];
+                }
+
+                [[NSFileManager defaultManager] removeItemAtPath: tempUnattendPath error: NULL];
+            }
         }
     }
 

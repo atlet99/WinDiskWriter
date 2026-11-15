@@ -68,6 +68,10 @@ destinationDirectory: (NSString *)destinationDirectory
 
 - (WimlibWrapperResult)patchWindowsRequirementsChecks;
 
+- (WimlibWrapperResult)addFileAtPath: (NSString * _Nonnull)sourceFilePath
+                      toImageAtIndex: (UInt32)imageIndex
+                         asImagePath: (NSString * _Nonnull)targetImagePath;
+
 typedef BOOL (^WimLibWrapperSplitImageCallback)(uint32_t totalPartsCount, uint32 currentPartNumber, uint64 bytesWritten, uint64 bytesTotal);
 
 - (WimlibWrapperResult)splitWithDestinationDirectoryPath: (NSString *)destinationDirectoryPath
