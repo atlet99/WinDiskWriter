@@ -325,6 +325,22 @@
     return NSLocalizedString(@"ALERT_TITLE_PROMPT_DOWNLOAD_ISO", NULL);
 }
 
++ (NSString *)checkboxviewTitleDisableBitLocker {
+    return NSLocalizedString(@"CHECKBOXVIEW_TITLE_DISABLE_BITLOCKER", NULL);
+}
+
++ (NSString *)checkboxviewTooltipDisableBitLocker {
+    return NSLocalizedString(@"CHECKBOXVIEW_TOOLTIP_DISABLE_BITLOCKER", NULL);
+}
+
++ (NSString *)checkboxviewTitleDisableDataCollection {
+    return NSLocalizedString(@"CHECKBOXVIEW_TITLE_DISABLE_DATA_COLLECTION", NULL);
+}
+
++ (NSString *)checkboxviewTooltipDisableDataCollection {
+    return NSLocalizedString(@"CHECKBOXVIEW_TOOLTIP_DISABLE_DATA_COLLECTION", NULL);
+}
+
 + (NSString *)checkboxviewTooltipInstallLegacyBootSector {
     return NSLocalizedString(@"CHECKBOXVIEW_TOOLTIP_INSTALL_LEGACY_BOOT_SECTOR", NULL);
 }

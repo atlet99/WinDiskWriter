@@ -728,84 +728,21 @@ if (![self commonErrorCheckerWithError:error]) {
         }
     }
 
-    // Fix for TechUnRestricted/windiskwriter#54 and #32: the INSTALLATIONTYPE
-    // XML tweak alone stopped satisfying Windows 11 24H2+ hardware checks.
-    // Inject a windowsPE Autounattend.xml into the written sources/boot.wim
-    // (Setup image, index 2; unofficial ISOs sometimes keep it at index 1) so
-    // Windows Setup registers the LabConfig bypasses itself on every machine.
-    if (self.patchInstallerRequirements) {
+    // Fix for TechUnRestricted/windiskwriter#54 and #32, with the disable-BitLocker
+    // and privacy toggles: inject a windowsPE/oobeSystem Autounattend.xml into the
+    // written sources/boot.wim (Setup image, index 2; index 1 as a fallback for
+    // unofficial ISOs) so Windows Setup applies the configured options itself.
+    if (self.patchInstallerRequirements || self.disableBitLockerEncryption || self.disableDataCollection) {
         NSString *destinationBootWimPath = [self.destinationPath stringByAppendingPathComponent: @"sources/boot.wim"];
 
         if ([localFileManager fileExistsAtPath: destinationBootWimPath]) {
             NSString *tempUnattendPath = [NSTemporaryDirectory() stringByAppendingPathComponent: @"WDW-Autounattend.xml"];
 
-            NSString *bypassUnattendXML = @"<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"
-            @"<unattend xmlns=\"urn:schemas-microsoft-com:unattend\">\n"
-            @"  <settings pass=\"windowsPE\">\n"
-            @"    <component name=\"Microsoft-Windows-Setup\" processorArchitecture=\"amd64\" language=\"neutral\" xmlns:wcm=\"http://schemas.microsoft.com/WMIConfig/2002/State\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" publicKeyToken=\"31bf3856ad364e35\" versionScope=\"nonSxS\">\n"
-            @"      <UserData>\n"
-            @"        <AcceptEula>true</AcceptEula>\n"
-            @"        <ProductKey>\n"
-            @"          <Key />\n"
-            @"        </ProductKey>\n"
-            @"      </UserData>\n"
-            @"      <RunSynchronous>\n"
-            @"        <RunSynchronousCommand wcm:action=\"add\">\n"
-            @"          <Order>1</Order>\n"
-            @"          <Path>reg add HKLM\\SYSTEM\\Setup\\LabConfig /v BypassTPMCheck /t REG_DWORD /d 1 /f</Path>\n"
-            @"        </RunSynchronousCommand>\n"
-            @"        <RunSynchronousCommand wcm:action=\"add\">\n"
-            @"          <Order>2</Order>\n"
-            @"          <Path>reg add HKLM\\SYSTEM\\Setup\\LabConfig /v BypassSecureBootCheck /t REG_DWORD /d 1 /f</Path>\n"
-            @"        </RunSynchronousCommand>\n"
-            @"        <RunSynchronousCommand wcm:action=\"add\">\n"
-            @"          <Order>3</Order>\n"
-            @"          <Path>reg add HKLM\\SYSTEM\\Setup\\LabConfig /v BypassRAMCheck /t REG_DWORD /d 1 /f</Path>\n"
-            @"        </RunSynchronousCommand>\n"
-            @"        <RunSynchronousCommand wcm:action=\"add\">\n"
-            @"          <Order>4</Order>\n"
-            @"          <Path>reg add HKLM\\SYSTEM\\Setup\\LabConfig /v BypassCPUCheck /t REG_DWORD /d 1 /f</Path>\n"
-            @"        </RunSynchronousCommand>\n"
-            @"        <RunSynchronousCommand wcm:action=\"add\">\n"
-            @"          <Order>5</Order>\n"
-            @"          <Path>reg add HKLM\\SYSTEM\\Setup\\LabConfig /v BypassStorageCheck /t REG_DWORD /d 1 /f</Path>\n"
-            @"        </RunSynchronousCommand>\n"
-            @"      </RunSynchronous>\n"
-            @"    </component>\n"
-            @"    <component name=\"Microsoft-Windows-Setup\" processorArchitecture=\"arm64\" language=\"neutral\" xmlns:wcm=\"http://schemas.microsoft.com/WMIConfig/2002/State\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" publicKeyToken=\"31bf3856ad364e35\" versionScope=\"nonSxS\">\n"
-            @"      <UserData>\n"
-            @"        <AcceptEula>true</AcceptEula>\n"
-            @"        <ProductKey>\n"
-            @"          <Key />\n"
-            @"        </ProductKey>\n"
-            @"      </UserData>\n"
-            @"      <RunSynchronous>\n"
-            @"        <RunSynchronousCommand wcm:action=\"add\">\n"
-            @"          <Order>1</Order>\n"
-            @"          <Path>reg add HKLM\\SYSTEM\\Setup\\LabConfig /v BypassTPMCheck /t REG_DWORD /d 1 /f</Path>\n"
-            @"        </RunSynchronousCommand>\n"
-            @"        <RunSynchronousCommand wcm:action=\"add\">\n"
-            @"          <Order>2</Order>\n"
-            @"          <Path>reg add HKLM\\SYSTEM\\Setup\\LabConfig /v BypassSecureBootCheck /t REG_DWORD /d 1 /f</Path>\n"
-            @"        </RunSynchronousCommand>\n"
-            @"        <RunSynchronousCommand wcm:action=\"add\">\n"
-            @"          <Order>3</Order>\n"
-            @"          <Path>reg add HKLM\\SYSTEM\\Setup\\LabConfig /v BypassRAMCheck /t REG_DWORD /d 1 /f</Path>\n"
-            @"        </RunSynchronousCommand>\n"
-            @"        <RunSynchronousCommand wcm:action=\"add\">\n"
-            @"          <Order>4</Order>\n"
-            @"          <Path>reg add HKLM\\SYSTEM\\Setup\\LabConfig /v BypassCPUCheck /t REG_DWORD /d 1 /f</Path>\n"
-            @"        </RunSynchronousCommand>\n"
-            @"        <RunSynchronousCommand wcm:action=\"add\">\n"
-            @"          <Order>5</Order>\n"
-            @"          <Path>reg add HKLM\\SYSTEM\\Setup\\LabConfig /v BypassStorageCheck /t REG_DWORD /d 1 /f</Path>\n"
-            @"        </RunSynchronousCommand>\n"
-            @"      </RunSynchronous>\n"
-            @"    </component>\n"
-            @"  </settings>\n"
-            @"</unattend>\n";
+            NSString *bypassUnattendXML = [DiskWriter autounattendXMLWithHardwareBypass: self.patchInstallerRequirements
+                                                                    disableBitLocker: self.disableBitLockerEncryption
+                                                               disableDataCollection: self.disableDataCollection];
 
-            if ([bypassUnattendXML writeToFile: tempUnattendPath atomically: YES encoding: NSUTF8StringEncoding error: NULL]) {
+            if (bypassUnattendXML != NULL && [bypassUnattendXML writeToFile: tempUnattendPath atomically: YES encoding: NSUTF8StringEncoding error: NULL]) {
                 WimlibWrapper *bootWimWrapper = [[WimlibWrapper alloc] initWithWimPath: destinationBootWimPath];
 
                 WimlibWrapperResult injectionResult = [bootWimWrapper addFileAtPath: tempUnattendPath
@@ -822,7 +759,6 @@ if (![self commonErrorCheckerWithError:error]) {
             }
         }
     }
-
     // Fix for TechUnRestricted/windiskwriter#64 and #2: an ei.cfg with an empty
     // EditionID makes Windows Setup show the edition picker instead of silently
     // installing the edition hardcoded in the ACPI SLIC table of the target PC.
@@ -1090,6 +1026,95 @@ postLegacyBootloaderInstall:
     callback(imageFile, bytesWritten, DWOperationTypeWriteRawImage, DWOperationResultSuccess, NULL);
 
     return YES;
+}
+
+// Builds the Autounattend.xml injected into sources/boot.wim. Components are
+// emitted for both amd64 and arm64 so one file serves either installation.
+// Sections mirror the hardware-check bypasses (windowsPE LabConfig reg-adds)
+// and the privacy / device-encryption toggles (oobeSystem).
++ (NSString *)autounattendXMLWithHardwareBypass: (BOOL)hardwareBypass
+                                   disableBitLocker: (BOOL)disableBitLocker
+                              disableDataCollection: (BOOL)disableDataCollection {
+    if (!hardwareBypass && !disableBitLocker && !disableDataCollection) {
+        return NULL;
+    }
+
+    NSMutableString *xml = [NSMutableString stringWithString:
+        @"<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"
+        @"<unattend xmlns=\"urn:schemas-microsoft-com:unattend\">\n"];
+
+    if (hardwareBypass) {
+        [xml appendString: @"  <settings pass=\"windowsPE\">\n"];
+
+        for (NSString *architecture in @[@"amd64", @"arm64"]) {
+            [xml appendFormat:
+                @"    <component name=\"Microsoft-Windows-Setup\" processorArchitecture=\"%@\" language=\"neutral\" "
+                @"xmlns:wcm=\"http://schemas.microsoft.com/WMIConfig/2002/State\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" "
+                @"publicKeyToken=\"31bf3856ad364e35\" versionScope=\"nonSxS\">\n", architecture];
+            [xml appendString:
+                @"      <UserData>\n"
+                @"        <AcceptEula>true</AcceptEula>\n"
+                @"        <ProductKey>\n"
+                @"          <Key />\n"
+                @"        </ProductKey>\n"
+                @"      </UserData>\n"
+                @"      <RunSynchronous>\n"];
+
+            NSDictionary *bypassOrder = @{@1: @"BypassTPMCheck", @2: @"BypassSecureBootCheck", @3: @"BypassRAMCheck", @4: @"BypassCPUCheck", @5: @"BypassStorageCheck"};
+            for (NSNumber *order in bypassOrder) {
+                [xml appendFormat:
+                    @"        <RunSynchronousCommand wcm:action=\"add\">\n"
+                    @"          <Order>%@</Order>\n"
+                    @"          <Path>reg add HKLM\\SYSTEM\\Setup\\LabConfig /v %@ /t REG_DWORD /d 1 /f</Path>\n"
+                    @"        </RunSynchronousCommand>\n", order, bypassOrder[order]];
+            }
+
+            [xml appendString:
+                @"      </RunSynchronous>\n"
+                @"    </component>\n"];
+        }
+
+        [xml appendString: @"  </settings>\n"];
+    }
+
+    if (disableBitLocker || disableDataCollection) {
+        [xml appendString: @"  <settings pass=\"oobeSystem\">\n"];
+
+        for (NSString *architecture in @[@"amd64", @"arm64"]) {
+            NSString *componentHeaderFormat =
+                @"    <component name=\"%@\" processorArchitecture=\"%@\" language=\"neutral\" "
+                @"xmlns:wcm=\"http://schemas.microsoft.com/WMIConfig/2002/State\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" "
+                @"publicKeyToken=\"31bf3856ad364e35\" versionScope=\"nonSxS\">\n";
+
+            if (disableDataCollection) {
+                [xml appendFormat: componentHeaderFormat, @"Microsoft-Windows-Shell-Setup", architecture];
+                [xml appendString:
+                    @"      <OOBE>\n"
+                    @"        <HideEULAPage>true</HideEULAPage>\n"
+                    @"        <ProtectYourPC>3</ProtectYourPC>\n"
+                    @"      </OOBE>\n"
+                    @"    </component>\n"];
+            }
+
+            if (disableBitLocker) {
+                [xml appendFormat: componentHeaderFormat, @"Microsoft-Windows-SecureStartup-FilterDriver", architecture];
+                [xml appendString:
+                    @"      <PreventDeviceEncryption>true</PreventDeviceEncryption>\n"
+                    @"    </component>\n"];
+
+                [xml appendFormat: componentHeaderFormat, @"Microsoft-Windows-EnhancedStorage-Adm", architecture];
+                [xml appendString:
+                    @"      <TCGSecurityActivationDisabled>1</TCGSecurityActivationDisabled>\n"
+                    @"    </component>\n"];
+            }
+        }
+
+        [xml appendString: @"  </settings>\n"];
+    }
+
+    [xml appendString: @"</unattend>\n"];
+
+    return xml;
 }
 
 @end

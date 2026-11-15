@@ -227,6 +227,14 @@ NS_ASSUME_NONNULL_BEGIN
 
 + (NSString *)alertTitlePromptDownloadISO;
 
++ (NSString *)checkboxviewTitleDisableBitLocker;
+
++ (NSString *)checkboxviewTooltipDisableBitLocker;
+
++ (NSString *)checkboxviewTitleDisableDataCollection;
+
++ (NSString *)checkboxviewTooltipDisableDataCollection;
+
 + (NSString *)progressTitleWriteRawImage;
 
 /// @brief Add support for older firmwares that don't support booting from EFI.

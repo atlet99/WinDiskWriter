@@ -63,6 +63,8 @@ WriteExitForce();                     \
     CheckBoxView *installLegacyBootCheckBoxView;
     CheckBoxView *addEiCfgFileCheckboxView;
     CheckBoxView *skipOnlineAccountCheckboxView;
+    CheckBoxView *disableBitLockerCheckboxView;
+    CheckBoxView *disableDataCollectionCheckboxView;
     NSSegmentedControl *filesystemPickerSegmentedControl;
     NSSegmentedControl *partitionSchemePickerSegmentedControl;
     
@@ -264,6 +266,24 @@ WriteExitForce();                     \
         [skipOnlineAccountCheckboxView setToolTip: [LocalizedStrings checkboxviewTooltipSkipOnlineAccount]];
 
         [skipOnlineAccountCheckboxView setState: NSOffState];
+    }
+
+    disableBitLockerCheckboxView = [[CheckBoxView alloc] init]; {
+        [mainVerticalLayout addView:disableBitLockerCheckboxView width:INFINITY height:disableBitLockerCheckboxView.cell.cellSize.height];
+
+        [disableBitLockerCheckboxView setTitle: [LocalizedStrings checkboxviewTitleDisableBitLocker]];
+        [disableBitLockerCheckboxView setToolTip: [LocalizedStrings checkboxviewTooltipDisableBitLocker]];
+
+        [disableBitLockerCheckboxView setState: NSOffState];
+    }
+
+    disableDataCollectionCheckboxView = [[CheckBoxView alloc] init]; {
+        [mainVerticalLayout addView:disableDataCollectionCheckboxView width:INFINITY height:disableDataCollectionCheckboxView.cell.cellSize.height];
+
+        [disableDataCollectionCheckboxView setTitle: [LocalizedStrings checkboxviewTitleDisableDataCollection]];
+        [disableDataCollectionCheckboxView setToolTip: [LocalizedStrings checkboxviewTooltipDisableDataCollection]];
+
+        [disableDataCollectionCheckboxView setState: NSOffState];
     }
     
     [mainVerticalLayout addView:spacerView width:INFINITY height: 3];
@@ -1135,6 +1155,8 @@ WriteExitForce();                     \
         [diskWriter setInstallLegacyBoot: installLegacyBoot];
         [diskWriter setAddEiCfgFile: self->addEiCfgFileCheckboxView.state == NSOnState];
         [diskWriter setAddUnattendFile: self->skipOnlineAccountCheckboxView.state == NSOnState];
+        [diskWriter setDisableBitLockerEncryption: self->disableBitLockerCheckboxView.state == NSOnState];
+        [diskWriter setDisableDataCollection: self->disableDataCollectionCheckboxView.state == NSOnState];
         
         NSError *writeError = NULL;
         
@@ -1299,6 +1321,7 @@ WriteExitForce();                     \
 
     [releaseAlert addButtonWithTitle: @"Windows 11"];
     [releaseAlert addButtonWithTitle: @"Windows 10 22H2"];
+    [releaseAlert addButtonWithTitle: @"UEFI Shell"];
 
     [releaseAlert beginSheetModalForWindow: self
                              modalDelegate: self
@@ -1311,9 +1334,46 @@ WriteExitForce();                     \
                        contextInfo: (void *)contextInfo {
     // Microsoft assigns each architecture its own productEditionId:
     // 3813 = Win11 Home/Pro/Edu x64, 3816 = Win11 ARM64, 2618 = Win10 22H2 Home/Pro/Edu.
-    NSArray<NSNumber *> *editionIds = (returnCode == NSAlertSecondButtonReturn) ? @[@2618] : @[@3813, @3816];
+    NSArray<NSNumber *> *editionIds = @[@3813, @3816];
+    BOOL downloadUEFIShell = NO;
+
+    if (returnCode == NSAlertSecondButtonReturn) {
+        editionIds = @[@2618];
+    } else if (returnCode == NSAlertThirdButtonReturn) {
+        downloadUEFIShell = YES;
+    }
 
     [downloadISOButtonView setEnabled: NO];
+
+    if (downloadUEFIShell) {
+        [logsView appendRow: [LocalizedStrings msISOStatusDownloadingImage] logType: ASLogTypeLog];
+
+        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+            NSError *uefiShellError = NULL;
+            NSString *uefiShellPath = [HelperFunctions downloadUEFIShellISOWithError: &uefiShellError];
+
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [self->downloadISOButtonView setEnabled: YES];
+
+                if (uefiShellPath == NULL) {
+                    [self displayWarningAlertWithTitle: [LocalizedStrings alertTitleCheckDataCorrectness]
+                                              subtitle: uefiShellError.stringValue
+                                                  icon: NSImageNameCaution];
+
+                    [self->logsView appendRow: uefiShellError.stringValue logType: ASLogTypeFailure];
+
+                    return;
+                }
+
+                [self->windowsImageInputView setStringValue: uefiShellPath];
+
+                [self->logsView appendRow: [LocalizedStrings msISOStatusImageDownloaded] logType: ASLogTypeSuccess];
+                [self->logsView appendRow: uefiShellPath logType: ASLogTypeLog];
+            });
+        });
+
+        return;
+    }
 
     NSString *locale = [[[NSLocale currentLocale] localeIdentifier] lowercaseString];
     locale = [locale stringByReplacingOccurrencesOfString: @"_" withString: @"-"];
@@ -1441,6 +1501,8 @@ WriteExitForce();                     \
         [self->installLegacyBootCheckBoxView setEnabled: enabledUIState];
         [self->addEiCfgFileCheckboxView setEnabled: enabledUIState];
         [self->skipOnlineAccountCheckboxView setEnabled: enabledUIState];
+        [self->disableBitLockerCheckboxView setEnabled: enabledUIState];
+        [self->disableDataCollectionCheckboxView setEnabled: enabledUIState];
         [self->windowsImageInputView setEnabled: enabledUIState];
         [self->devicePickerView setEnabled: enabledUIState];
                 

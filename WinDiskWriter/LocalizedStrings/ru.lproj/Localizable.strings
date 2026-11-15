@@ -204,6 +204,10 @@
 "BUTTON_TITLE_DOWNLOAD_ISO" = "Скачать ISO";
 "MSISO_STATUS_IMAGE_DOWNLOADED" = "Официальный образ скачан и выбран.";
 "ALERT_TITLE_PROMPT_DOWNLOAD_ISO" = "Какую версию Windows скачать?";
+"CHECKBOXVIEW_TITLE_DISABLE_BITLOCKER" = "Отключить шифрование BitLocker";
+"CHECKBOXVIEW_TOOLTIP_DISABLE_BITLOCKER" = "Запретить Windows автоматически включать шифрование BitLocker на устанавливаемом диске.";
+"CHECKBOXVIEW_TITLE_DISABLE_DATA_COLLECTION" = "Отключить сбор данных";
+"CHECKBOXVIEW_TOOLTIP_DISABLE_DATA_COLLECTION" = "Скрыть страницу лицензионного соглашения и выставить самый строгий уровень приватности (телеметрии) при установке.";
 
 "DADISK_ERROR_TEXT_BAD_ARGUMENT" = "В функцию передан некорректный аргумент.";
 

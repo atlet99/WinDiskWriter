@@ -55,6 +55,8 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, readwrite) BOOL installLegacyBoot;
 @property (nonatomic, readwrite) BOOL addEiCfgFile;
 @property (nonatomic, readwrite) BOOL addUnattendFile;
+@property (nonatomic, readwrite) BOOL disableBitLockerEncryption;
+@property (nonatomic, readwrite) BOOL disableDataCollection;
 
 - (instancetype)init NS_UNAVAILABLE;
 

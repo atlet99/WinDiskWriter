@@ -204,6 +204,10 @@
 "BUTTON_TITLE_DOWNLOAD_ISO" = "Download ISO";
 "MSISO_STATUS_IMAGE_DOWNLOADED" = "Official image downloaded and selected.";
 "ALERT_TITLE_PROMPT_DOWNLOAD_ISO" = "Which Windows release do you want to download?";
+"CHECKBOXVIEW_TITLE_DISABLE_BITLOCKER" = "Disable BitLocker Device Encryption";
+"CHECKBOXVIEW_TOOLTIP_DISABLE_BITLOCKER" = "Prevent Windows from automatically encrypting the target drive with BitLocker device encryption.";
+"CHECKBOXVIEW_TITLE_DISABLE_DATA_COLLECTION" = "Disable Data Collection";
+"CHECKBOXVIEW_TOOLTIP_DISABLE_DATA_COLLECTION" = "Hide the EULA page and set the privacy (telemetry) option to the strictest level during setup.";
 
 "DADISK_ERROR_TEXT_BAD_ARGUMENT" = "An invalid argument was passed to the function.";
 

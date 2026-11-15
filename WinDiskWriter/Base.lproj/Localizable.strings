@@ -58,6 +58,10 @@
 "BUTTON_TITLE_DOWNLOAD_ISO" = "Download ISO";
 "MSISO_STATUS_IMAGE_DOWNLOADED" = "Official image downloaded and selected.";
 "ALERT_TITLE_PROMPT_DOWNLOAD_ISO" = "Which Windows release do you want to download?";
+"CHECKBOXVIEW_TITLE_DISABLE_BITLOCKER" = "Disable BitLocker Device Encryption";
+"CHECKBOXVIEW_TOOLTIP_DISABLE_BITLOCKER" = "Prevent Windows from automatically encrypting the target drive with BitLocker device encryption.";
+"CHECKBOXVIEW_TITLE_DISABLE_DATA_COLLECTION" = "Disable Data Collection";
+"CHECKBOXVIEW_TOOLTIP_DISABLE_DATA_COLLECTION" = "Hide the EULA page and set the privacy (telemetry) option to the strictest level during setup.";
 "CHECKBOXVIEW_TITLE_INSTALL_LEGACY_BOOT_SECTOR" = "Install Legacy Boot Sector";
 "CHECKBOXVIEW_TOOLTIP_INSTALL_LEGACY_BOOT_SECTOR" = "Add support for older firmwares that don't support booting from EFI.";
 "TOOLTIP_FRAMELAYOUT_FORMATTING_SECTION" = "Desired filesystem for the destination device.\n(FAT32 is the best choice for compatibility)";
