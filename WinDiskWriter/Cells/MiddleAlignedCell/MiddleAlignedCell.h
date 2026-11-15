@@ -10,7 +10,10 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface MiddleAlignedCell : NSCell
+// Fix for TechUnRestricted/windiskwriter#74: AppKit (macOS Tahoe 26.6+) calls the
+// private _visualProviderIfExists selector, which a bare NSCell lacks — crash on
+// launch. NSTextFieldCell provides the expected implementation.
+@interface MiddleAlignedCell : NSTextFieldCell
 
 @end
 
