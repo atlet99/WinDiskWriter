@@ -51,6 +51,8 @@
 "LOGVIEW_ROW_TITLE_IMAGE_CHECKSUM_FAILURE" = "Failed to compute image checksum.";
 "PROGRESS_TITLE_VERIFY_WRITTEN_FILES" = "Verify Written Files";
 "ERROR_TEXT_WRITTEN_FILE_VERIFICATION_FAILURE" = "Written file verification failed: %@.";
+"LOGVIEW_ROW_TITLE_RAW_IMAGE_DETECTED" = "Non-Windows image detected — it will be written byte-for-byte (raw mode).";
+"PROGRESS_TITLE_WRITE_RAW_IMAGE" = "Write Raw Image";
 "CHECKBOXVIEW_TITLE_INSTALL_LEGACY_BOOT_SECTOR" = "Install Legacy Boot Sector";
 "CHECKBOXVIEW_TOOLTIP_INSTALL_LEGACY_BOOT_SECTOR" = "Add support for older firmwares that don't support booting from EFI.";
 "TOOLTIP_FRAMELAYOUT_FORMATTING_SECTION" = "Desired filesystem for the destination device.\n(FAT32 is the best choice for compatibility)";

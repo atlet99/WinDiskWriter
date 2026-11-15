@@ -297,6 +297,14 @@
     return [NSString stringWithFormat: unformattedString, argument1];
 }
 
++ (NSString *)logviewRowTitleRawImageDetected {
+    return NSLocalizedString(@"LOGVIEW_ROW_TITLE_RAW_IMAGE_DETECTED", NULL);
+}
+
++ (NSString *)progressTitleWriteRawImage {
+    return NSLocalizedString(@"PROGRESS_TITLE_WRITE_RAW_IMAGE", NULL);
+}
+
 + (NSString *)checkboxviewTooltipInstallLegacyBootSector {
     return NSLocalizedString(@"CHECKBOXVIEW_TOOLTIP_INSTALL_LEGACY_BOOT_SECTOR", NULL);
 }

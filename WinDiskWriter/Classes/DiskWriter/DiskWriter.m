@@ -7,6 +7,8 @@
 //
 
 #import <Foundation/Foundation.h>
+#import <unistd.h>
+#import "CommandLine.h"
 #import "NSFileManager+Common.h"
 #import "DWFilesContainer.h"
 #import "LocalizedStrings.h"
@@ -871,6 +873,114 @@ postLegacyBootloaderInstall:
                                                                                    error: NULL];
     
     return [[filesystemAttributes objectForKey: NSFileSystemFreeSize] longLongValue];
+}
+
+// Fix for TechUnRestricted/windiskwriter#61: non-Windows bootable images
+// (Linux ISOs and the like) cannot be written through the FAT32 file-copy
+// pipeline — they expect the whole image to land on the device byte-for-byte,
+// so the write goes straight to the raw BSD device instead.
++ (BOOL)rawWriteImageFileAtPath: (NSString *)imagePath
+                    toBSDDevice: (NSString *)bsdName
+                       callback: (ChainedCallbackAction)callback
+                          error: (NSError *_Nullable *_Nullable)error {
+    // Nothing may hold the volumes we are about to overwrite.
+    [CommandLine execute: @"/usr/sbin/diskutil"
+               arguments: @[@"unmountDisk", @"force", bsdName]
+               exception: NULL];
+
+    NSString *rawDevicePath = [@"/dev/r" stringByAppendingString: bsdName];
+
+    FILE *source = fopen([imagePath UTF8String], "rb");
+    if (source == NULL) {
+        if (error) {
+            *error = [NSError errorWithStringValue: [LocalizedStrings errorTextOpenSourceFileFailure]];
+        }
+
+        return NO;
+    }
+
+    FILE *destination = fopen([rawDevicePath UTF8String], "wb");
+    if (destination == NULL) {
+        fclose(source);
+
+        if (error) {
+            *error = [NSError errorWithStringValue: [LocalizedStrings errorTextOpenDestinationPathFailure]];
+        }
+
+        return NO;
+    }
+
+    DWFile *imageFile = [[DWFile alloc] initWithSourcePath: imagePath];
+    fseek(source, 0, SEEK_END);
+    imageFile.size = ftell(source);
+    fseek(source, 0, SEEK_SET);
+
+    callback(imageFile, 0, DWOperationTypeWriteRawImage, DWOperationResultStart, NULL);
+
+    void *buffer = malloc(COPY_BUFFER_SIZE);
+    if (buffer == NULL) {
+        fclose(source);
+        fclose(destination);
+
+        NSError *localError = [NSError errorWithStringValue: [LocalizedStrings errorTextAllocateMemoryBufferFailure]];
+        callback(imageFile, 0, DWOperationTypeWriteRawImage, DWOperationResultFailure, localError);
+
+        if (error) {
+            *error = localError;
+        }
+
+        return NO;
+    }
+
+    uint64_t bytesWritten = 0;
+
+    while (true) {
+        size_t readSize = fread(buffer, 1, COPY_BUFFER_SIZE, source);
+        if (readSize == 0) {
+            break;
+        }
+
+        size_t writeSize = fwrite(buffer, 1, readSize, destination);
+        bytesWritten += writeSize;
+
+        DWAction action = callback(imageFile, bytesWritten, DWOperationTypeWriteRawImage, DWOperationResultProcess, NULL);
+
+        // There is nothing to "skip" in a raw stream — Stop and Skip both abort.
+        if (action != DWActionContinue) {
+            free(buffer);
+            fclose(source);
+            fclose(destination);
+
+            return NO;
+        }
+
+        if (writeSize != readSize) {
+            free(buffer);
+            fclose(source);
+            fclose(destination);
+
+            NSError *localError = [NSError errorWithStringValue: [LocalizedStrings errorTextWriteDestinationPathDataFailure]];
+            callback(imageFile, bytesWritten, DWOperationTypeWriteRawImage, DWOperationResultFailure, localError);
+
+            if (error) {
+                *error = localError;
+            }
+
+            return NO;
+        }
+    }
+
+    free(buffer);
+
+    // Make sure the OS pushes everything to the device before declaring victory.
+    fflush(destination);
+    fsync(fileno(destination));
+    fclose(source);
+    fclose(destination);
+
+    callback(imageFile, bytesWritten, DWOperationTypeWriteRawImage, DWOperationResultSuccess, NULL);
+
+    return YES;
 }
 
 @end

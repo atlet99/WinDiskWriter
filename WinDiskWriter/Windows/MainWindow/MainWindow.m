@@ -810,6 +810,100 @@ WriteExitForce();                     \
     return YES;
 }
 
+// Fix for TechUnRestricted/windiskwriter#61: raw (byte-for-byte) write path for
+// non-Windows bootable images. Requires root, since the destination is a block
+// device — same privilege level as the legacy boot sector installation.
+- (void)writeRawImageActionWithDiskInfo: (DiskInfo *)destinationDiskInfo
+                         mountedISOPath: (NSString *)mountedISOPath {
+    if (![HelperFunctions hasElevatedRights]) {
+        [self requireRestartAsRoot];
+
+        WriteExitForce();
+    }
+
+    // The ISO was only mounted to tell it apart from a Windows image.
+    [CommandLine execute: @"/usr/bin/hdiutil"
+               arguments: @[@"detach", mountedISOPath]
+               exception: NULL];
+
+    NSString *imageFilePath = [windowsImageInputView.stringValue copy];
+    NSString *destinationBSDName = destinationDiskInfo.BSDName;
+
+    [logsView appendRow: [LocalizedStrings logviewRowTitleRawImageDetected] logType: ASLogTypeLog];
+
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+        [self->logsView appendRow: [LocalizedStrings logviewRowTitleComputingImageChecksum] logType: ASLogTypeLog];
+
+        NSString *imageChecksum = [HelperFunctions sha256ForFileAtPath: imageFilePath];
+        if (imageChecksum != NULL) {
+            [self->logsView appendRow: [LocalizedStrings logviewRowTitleImageChecksumWithArgument1: imageChecksum]
+                              logType: ASLogTypeLog];
+        } else {
+            [self->logsView appendRow: [LocalizedStrings logviewRowTitleImageChecksumFailure]
+                              logType: ASLogTypeFailure];
+        }
+
+        [self->totalOperationProgressBarView setMaxValueSynchronously: 1];
+
+        NSError *rawWriteError = NULL;
+        BOOL rawWriteSuccessful = [DiskWriter rawWriteImageFileAtPath: imageFilePath
+                                                         toBSDDevice: destinationBSDName
+                                                            callback: ^DWAction(DWFile * _Nonnull dwFile, uint64 copiedBytes, DWOperationType operationType, DWOperationResult operationResult, NSError * _Nullable error) {
+            if (self.isScheduledForStop) {
+                return DWActionStop;
+            }
+
+            if (copiedBytes == 0) {
+                [self->currentOperationProgressBarView resetProgressSynchronously];
+
+                [self setCurrentProgressTitle: [dwFile.sourcePath lastPathComponent]];
+            }
+
+            [self setCurrentProgressWithWrittenBytes: copiedBytes
+                                       fileSizeBytes: dwFile.size];
+
+            switch (operationResult) {
+                case DWOperationResultStart:
+                    [self->logsView appendRow: [LocalizedStrings progressTitleWriteRawImage] logType: ASLogTypeStart];
+                    break;
+                case DWOperationResultSuccess:
+                    [self->logsView appendRow: [LocalizedStrings progressTitleWriteRawImage] logType: ASLogTypeSuccess];
+
+                    [self->totalOperationProgressBarView incrementBySynchronously: 1];
+                    break;
+                case DWOperationResultFailure:
+                    [self->logsView appendRow: [[LocalizedStrings progressTitleWriteRawImage] stringByAppendingFormat:
+                                                @" %@", [LocalizedStrings logviewRowPartialTitleErrorMessageWithArgument1: error.stringValue]]
+                                      logType: ASLogTypeFailure];
+                    break;
+                default:
+                    break;
+            }
+
+            return DWActionContinue;
+        }
+                                                          error: &rawWriteError];
+
+        if (!rawWriteSuccessful || rawWriteError != NULL) {
+            [self displayWarningAlertWithTitle: [LocalizedStrings alertTitleImageWritingFailure]
+                                      subtitle: rawWriteError.stringValue
+                                          icon: NSImageNameCaution];
+
+            [self->logsView appendRow: rawWriteError.stringValue logType: ASLogTypeFatal];
+
+            WriteExitForce();
+        }
+
+        [self displayWarningAlertWithTitle: [LocalizedStrings alertTitleImageWritingSuccess]
+                                  subtitle: [LocalizedStrings alertSubtitleImageWritingSuccess]
+                                      icon: NULL];
+
+        [self->logsView appendRow:[LocalizedStrings alertTitleImageWritingSuccess] logType: ASLogTypeSuccess];
+
+        WriteExitForce();
+    });
+}
+
 - (void)writeAction {
     [self setIsScheduledForStop: NO];
     [self setEnabledUIState: NO];
@@ -870,6 +964,17 @@ WriteExitForce();                     \
         selectedFileSystem = FilesystemFAT32;
     } else {
         selectedFileSystem = FilesystemExFAT;
+    }
+
+    // Fix for TechUnRestricted/windiskwriter#61: images without a Windows
+    // installer layout (no sources/ directory — Linux ISOs and the like) are
+    // written byte-for-byte onto the raw device instead of the file-copy
+    // pipeline, which would destroy their bootloader structure.
+    NSString *imageSourcesDirectoryPath = [mountedImagePath stringByAppendingPathComponent: @"sources"];
+    if (![NSFileManager.defaultManager fileExistsAtPath: imageSourcesDirectoryPath]) {
+        [self writeRawImageActionWithDiskInfo: destinationSavedDiskInfo
+                               mountedISOPath: mountedImagePath];
+        return;
     }
     
     /*
@@ -1067,6 +1172,9 @@ WriteExitForce();                     \
                     break;
                 case DWOperationTypeVerifyWrittenFiles:
                     [onscreenLogText appendString: [LocalizedStrings progressTitleVerifyWrittenFiles]];
+                    break;
+                case DWOperationTypeWriteRawImage:
+                    [onscreenLogText appendString: [LocalizedStrings progressTitleWriteRawImage]];
                     break;
             }
             

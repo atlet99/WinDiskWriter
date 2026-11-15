@@ -35,7 +35,11 @@ typedef NS_ENUM(NSUInteger, DWOperationType) {
 
     DWOperationTypeInstallLegacyBootSector,
 
-    DWOperationTypeVerifyWrittenFiles
+    DWOperationTypeVerifyWrittenFiles,
+
+    /* Used for non-Windows images (Linux and other bootable ISOs):
+     the whole image is written byte-for-byte onto the raw device. */
+    DWOperationTypeWriteRawImage
 };
 
 @interface DiskWriter: NSObject
@@ -62,6 +66,11 @@ typedef DWAction (^ChainedCallbackAction)(DWFile *dwFile, uint64 copiedBytes, DW
 
 - (BOOL)startWritingWithError: (NSError **)error
              progressCallback: (ChainedCallbackAction)progressCallback;
+
++ (BOOL)rawWriteImageFileAtPath: (NSString * _Nonnull)imagePath
+                    toBSDDevice: (NSString * _Nonnull)bsdName
+                       callback: (ChainedCallbackAction _Nonnull)callback
+                          error: (NSError *_Nullable *_Nullable)error;
 
 + (NSString *)bootloaderGrldrMBRFilePath;
 + (NSString *)bootloaderGrldrFilePath;

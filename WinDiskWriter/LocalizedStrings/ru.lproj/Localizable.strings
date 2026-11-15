@@ -197,6 +197,8 @@
 "LOGVIEW_ROW_TITLE_IMAGE_CHECKSUM_FAILURE" = "Не удалось вычислить контрольную сумму образа.";
 "PROGRESS_TITLE_VERIFY_WRITTEN_FILES" = "Проверка записанных файлов";
 "ERROR_TEXT_WRITTEN_FILE_VERIFICATION_FAILURE" = "Проверка записанного файла не пройдена: %@.";
+"LOGVIEW_ROW_TITLE_RAW_IMAGE_DETECTED" = "Обнаружен не-Windows образ — он будет записан байт-в-байт (сырой режим).";
+"PROGRESS_TITLE_WRITE_RAW_IMAGE" = "Запись сырого образа";
 
 "DADISK_ERROR_TEXT_BAD_ARGUMENT" = "В функцию передан некорректный аргумент.";
 

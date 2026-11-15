@@ -215,6 +215,10 @@ NS_ASSUME_NONNULL_BEGIN
 
 + (NSString *)errorTextWrittenFileVerificationFailureWithArgument1:(id)argument1;
 
++ (NSString *)logviewRowTitleRawImageDetected;
+
++ (NSString *)progressTitleWriteRawImage;
+
 /// @brief Add support for older firmwares that don't support booting from EFI.
 + (NSString *)checkboxviewTooltipInstallLegacyBootSector;
 

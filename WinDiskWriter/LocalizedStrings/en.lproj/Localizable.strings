@@ -197,6 +197,8 @@
 "LOGVIEW_ROW_TITLE_IMAGE_CHECKSUM_FAILURE" = "Failed to compute image checksum.";
 "PROGRESS_TITLE_VERIFY_WRITTEN_FILES" = "Verify Written Files";
 "ERROR_TEXT_WRITTEN_FILE_VERIFICATION_FAILURE" = "Written file verification failed: %@.";
+"LOGVIEW_ROW_TITLE_RAW_IMAGE_DETECTED" = "Non-Windows image detected — it will be written byte-for-byte (raw mode).";
+"PROGRESS_TITLE_WRITE_RAW_IMAGE" = "Write Raw Image";
 
 "DADISK_ERROR_TEXT_BAD_ARGUMENT" = "An invalid argument was passed to the function.";
 
