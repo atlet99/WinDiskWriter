@@ -31,6 +31,7 @@
 #import "Constants.h"
 
 #import "DiskManagerProcessor.h"
+#import "CommandLine.h"
 #import "DiskWriter.h"
 
 #import "HelperFunctions.h"
@@ -932,6 +933,19 @@ WriteExitForce();                     \
             if (actualVolumePath != NULL) {
                 targetPartitionPath = actualVolumePath;
             }
+        }
+
+        // Fix for TechUnRestricted/windiskwriter#29, #52 and #53: the volume can
+        // come up from the automount in a read-only state when writing races the
+        // mount — remount it once so the copy loop does not fail on its first file.
+        if (![[NSFileManager defaultManager] isWritableFileAtPath: targetPartitionPath]) {
+            [CommandLine execute: @"/usr/sbin/diskutil"
+                       arguments: @[@"unmountDisk", destinationSavedDiskInfo.BSDName]
+                       exception: NULL];
+
+            [CommandLine execute: @"/usr/sbin/diskutil"
+                       arguments: @[@"mountDisk", destinationSavedDiskInfo.BSDName]
+                       exception: NULL];
         }
 
         DWFilesContainer *filesContainer = [DWFilesContainer containerFromContainerPath: mountedImagePath
