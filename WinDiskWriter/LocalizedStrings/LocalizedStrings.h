@@ -197,6 +197,10 @@ NS_ASSUME_NONNULL_BEGIN
 /// @brief Patch Installer Requirements
 + (NSString *)checkboxviewTitlePatchInstallerRequirements;
 
++ (NSString *)checkboxviewTitleAddEiCfgFile;
+
++ (NSString *)checkboxviewTooltipAddEiCfgFile;
+
 /// @brief Add support for older firmwares that don't support booting from EFI.
 + (NSString *)checkboxviewTooltipInstallLegacyBootSector;
 

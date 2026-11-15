@@ -56,6 +56,7 @@ WriteExitForce();                     \
     
     CheckBoxView *patchInstallerRequirementsCheckboxView;
     CheckBoxView *installLegacyBootCheckBoxView;
+    CheckBoxView *addEiCfgFileCheckboxView;
     NSSegmentedControl *filesystemPickerSegmentedControl;
     NSSegmentedControl *partitionSchemePickerSegmentedControl;
     
@@ -231,6 +232,15 @@ WriteExitForce();                     \
         if (![HelperFunctions hasElevatedRights]) {
             [installLegacyBootCheckBoxView setAction: @selector(requireRestartAsRoot)];
         }
+    }
+
+    addEiCfgFileCheckboxView = [[CheckBoxView alloc] init]; {
+        [mainVerticalLayout addView:addEiCfgFileCheckboxView width:INFINITY height:addEiCfgFileCheckboxView.cell.cellSize.height];
+
+        [addEiCfgFileCheckboxView setTitle: [LocalizedStrings checkboxviewTitleAddEiCfgFile]];
+        [addEiCfgFileCheckboxView setToolTip: [LocalizedStrings checkboxviewTooltipAddEiCfgFile]];
+
+        [addEiCfgFileCheckboxView setState: NSOffState];
     }
     
     [mainVerticalLayout addView:spacerView width:INFINITY height: 3];
@@ -981,6 +991,7 @@ WriteExitForce();                     \
         [diskWriter setDestinationFilesystem: selectedFileSystem];
         [diskWriter setPatchInstallerRequirements: patchInstallerRequirements];
         [diskWriter setInstallLegacyBoot: installLegacyBoot];
+        [diskWriter setAddEiCfgFile: self->addEiCfgFileCheckboxView.state == NSOnState];
         
         NSError *writeError = NULL;
         
@@ -1222,6 +1233,7 @@ WriteExitForce();                     \
         [self->updateDeviceListButtonView setEnabled: enabledUIState];
         [self->patchInstallerRequirementsCheckboxView setEnabled: enabledUIState];
         [self->installLegacyBootCheckBoxView setEnabled: enabledUIState];
+        [self->addEiCfgFileCheckboxView setEnabled: enabledUIState];
         [self->windowsImageInputView setEnabled: enabledUIState];
         [self->devicePickerView setEnabled: enabledUIState];
                 

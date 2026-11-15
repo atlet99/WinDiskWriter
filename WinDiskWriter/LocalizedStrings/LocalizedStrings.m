@@ -259,6 +259,14 @@
     return NSLocalizedString(@"CHECKBOXVIEW_TITLE_PATCH_INSTALLER_REQUIREMENTS", NULL);
 }
 
++ (NSString *)checkboxviewTitleAddEiCfgFile {
+    return NSLocalizedString(@"CHECKBOXVIEW_TITLE_ADD_EI_CFG_FILE", NULL);
+}
+
++ (NSString *)checkboxviewTooltipAddEiCfgFile {
+    return NSLocalizedString(@"CHECKBOXVIEW_TOOLTIP_ADD_EI_CFG_FILE", NULL);
+}
+
 + (NSString *)checkboxviewTooltipInstallLegacyBootSector {
     return NSLocalizedString(@"CHECKBOXVIEW_TOOLTIP_INSTALL_LEGACY_BOOT_SECTOR", NULL);
 }

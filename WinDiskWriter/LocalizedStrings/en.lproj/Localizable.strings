@@ -188,6 +188,8 @@
 
 
 "CHECKBOXVIEW_TOOLTIP_PATCH_INSTALLER_REQUIREMENTS" = "Remove TPM, Secure Boot and RAM requirements from the installer.\n(Windows 11 only)";
+"CHECKBOXVIEW_TITLE_ADD_EI_CFG_FILE" = "Add ei.cfg (Select Windows Edition)";
+"CHECKBOXVIEW_TOOLTIP_ADD_EI_CFG_FILE" = "Add sources/ei.cfg with an empty EditionID, so Windows Setup lets you pick the edition instead of auto-installing the one locked to your PCs ACPI SLIC key.";
 
 
 "DADISK_ERROR_TEXT_BAD_ARGUMENT" = "An invalid argument was passed to the function.";

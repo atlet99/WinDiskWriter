@@ -48,6 +48,7 @@ static const NSString *BUNDLE_BOOTLOADER_SUBDIRECTORY_NAME = @"grub4dos";
     _destinationFilesystem = FilesystemFAT32;
     _patchInstallerRequirements = NO;
     _installLegacyBoot = NO;
+    _addEiCfgFile = NO;
     
     return self;
 }
@@ -653,6 +654,23 @@ if (![self commonErrorCheckerWithError:error]) {
         }
     }
     
+    // Fix for TechUnRestricted/windiskwriter#64 and #2: an ei.cfg with an empty
+    // EditionID makes Windows Setup show the edition picker instead of silently
+    // installing the edition hardcoded in the ACPI SLIC table of the target PC.
+    if (self.addEiCfgFile) {
+        NSString *sourcesDirectoryPath = [self.destinationPath stringByAppendingPathComponent: @"sources"];
+
+        if ([localFileManager fileExistsAtPath: sourcesDirectoryPath]) {
+            NSString *eiCfgFilePath = [sourcesDirectoryPath stringByAppendingPathComponent: @"ei.cfg"];
+            NSString *eiCfgContent = @"[EditionID]\n\n[Channel]\nRetail\n";
+
+            [eiCfgContent writeToFile: eiCfgFilePath
+                           atomically: YES
+                            encoding: NSUTF8StringEncoding
+                               error: NULL];
+        }
+    }
+
     // Trying to extract a bootloader for (x86_64 systems only. There is no need to check for x86 or ARM binaries.)
     if (installerWIMPackageFile && !hasEFIBootloader) {
         // Sadly, there is no way we can do it better without creating another macro

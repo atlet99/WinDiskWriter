@@ -188,6 +188,8 @@
 
 
 "CHECKBOXVIEW_TOOLTIP_PATCH_INSTALLER_REQUIREMENTS" = "Убрать требования ОЗУ, TPM и Secure Boot из установщика.\n(Только для Windows 11)";
+"CHECKBOXVIEW_TITLE_ADD_EI_CFG_FILE" = "Добавить ei.cfg (Выбор редакции Windows)";
+"CHECKBOXVIEW_TOOLTIP_ADD_EI_CFG_FILE" = "Добавляет sources/ei.cfg с пустым EditionID — установщик Windows предложит выбрать редакцию вместо автоустановки редакции, привязанной к ACPI SLIC-ключу вашего ПК.";
 
 
 "DADISK_ERROR_TEXT_BAD_ARGUMENT" = "В функцию передан некорректный аргумент.";
