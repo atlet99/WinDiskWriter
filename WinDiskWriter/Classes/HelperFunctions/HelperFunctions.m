@@ -740,8 +740,10 @@ static void initializeStaticVariables() {
             if (message == SDMMessageDidReceiveData) {
                 SDMCallbackStructDidReceiveData *callbackStruct = (SDMCallbackStructDidReceiveData *)SDMCallbackStruct;
                 if (callbackStruct->expectedFileSize > 0) {
-                    statusBlock([NSString stringWithFormat: @"%.1f%%",
-                                 100.0 * callbackStruct->downloadedBytesSize / callbackStruct->expectedFileSize]);
+                    statusBlock([NSString stringWithFormat: @"%.1f%% (%@ / %@)",
+                                 100.0 * callbackStruct->downloadedBytesSize / callbackStruct->expectedFileSize,
+                                 [HelperFunctions unitFormattedSizeFor: callbackStruct->downloadedBytesSize],
+                                 [HelperFunctions unitFormattedSizeFor: callbackStruct->expectedFileSize]]);
                 }
             }
 
