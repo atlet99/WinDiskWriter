@@ -65,6 +65,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 + (NSString *)unitFormattedSizeFor: (UInt64)bytes;
 
++ (NSString * _Nullable)sha256ForFileAtPath: (NSString * _Nonnull)path;
+
 @end
 
 NS_ASSUME_NONNULL_END

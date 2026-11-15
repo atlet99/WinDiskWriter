@@ -288,6 +288,15 @@
     return NSLocalizedString(@"LOGVIEW_ROW_TITLE_IMAGE_CHECKSUM_FAILURE", NULL);
 }
 
++ (NSString *)progressTitleVerifyWrittenFiles {
+    return NSLocalizedString(@"PROGRESS_TITLE_VERIFY_WRITTEN_FILES", NULL);
+}
+
++ (NSString *)errorTextWrittenFileVerificationFailureWithArgument1:(id)argument1 {
+    NSString *unformattedString = NSLocalizedString(@"ERROR_TEXT_WRITTEN_FILE_VERIFICATION_FAILURE", NULL);
+    return [NSString stringWithFormat: unformattedString, argument1];
+}
+
 + (NSString *)checkboxviewTooltipInstallLegacyBootSector {
     return NSLocalizedString(@"CHECKBOXVIEW_TOOLTIP_INSTALL_LEGACY_BOOT_SECTOR", NULL);
 }

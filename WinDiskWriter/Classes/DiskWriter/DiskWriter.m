@@ -654,7 +654,64 @@ if (![self commonErrorCheckerWithError:error]) {
             }
         }
     }
-    
+
+    // Fix for TechUnRestricted/windiskwriter#75 and #29: verify the written files
+    // after the copy loop, so an unexpected disconnect or a read-only mount
+    // surfaces as a verification failure instead of a silently broken installer.
+    // All file sizes are checked, plus the install image (or the largest file)
+    // gets a full SHA-256 comparison.
+    DWFile *verificationAnchorFile = self.filesContainer.files.firstObject;
+    if (verificationAnchorFile != NULL) {
+        switch (progressCallback(verificationAnchorFile, 0, DWOperationTypeVerifyWrittenFiles, DWOperationResultStart, NULL)) {
+            case DWActionStop:
+                return NO;
+            case DWActionSkip:
+            case DWActionContinue:
+                break;
+        }
+
+        // Note: the size sweep is instant, but the final hash comparison cannot
+        // be interrupted — worst case it delays a Stop request by one file hash.
+        BOOL verificationPassed = YES;
+        NSError *verificationError = NULL;
+        DWFile *hashCheckFile = installerWIMPackageFile;
+
+        for (DWFile *currentFile in [self.filesContainer files]) {
+            NSString *absoluteDestinationFilePath = [self.destinationPath stringByAppendingPathComponent: currentFile.sourcePath];
+            NSDictionary *destinationFileAttributes = [localFileManager attributesOfItemAtPath: absoluteDestinationFilePath
+                                                                                         error: NULL];
+
+            if (destinationFileAttributes == NULL || destinationFileAttributes.fileSize != currentFile.size) {
+                verificationPassed = NO;
+                verificationError = [NSError errorWithStringValue: [LocalizedStrings errorTextWrittenFileVerificationFailureWithArgument1: currentFile.sourcePath]];
+
+                break;
+            }
+
+            if (hashCheckFile == NULL || currentFile.size > hashCheckFile.size) {
+                hashCheckFile = currentFile;
+            }
+        }
+
+        if (verificationPassed && hashCheckFile != NULL) {
+            NSString *sourceHash = [HelperFunctions sha256ForFileAtPath: [self.filesContainer.containerPath stringByAppendingPathComponent: hashCheckFile.sourcePath]];
+            NSString *destinationHash = [HelperFunctions sha256ForFileAtPath: [self.destinationPath stringByAppendingPathComponent: hashCheckFile.sourcePath]];
+
+            if (sourceHash == NULL || destinationHash == NULL || ![sourceHash isEqualToString: destinationHash]) {
+                verificationPassed = NO;
+                verificationError = [NSError errorWithStringValue: [LocalizedStrings errorTextWrittenFileVerificationFailureWithArgument1: hashCheckFile.sourcePath]];
+            }
+        }
+
+        switch (progressCallback(verificationAnchorFile, 0, DWOperationTypeVerifyWrittenFiles, (verificationPassed ? DWOperationResultSuccess : DWOperationResultFailure), verificationError)) {
+            case DWActionStop:
+                return NO;
+            case DWActionSkip:
+            case DWActionContinue:
+                break;
+        }
+    }
+
     // Fix for TechUnRestricted/windiskwriter#64 and #2: an ei.cfg with an empty
     // EditionID makes Windows Setup show the edition picker instead of silently
     // installing the edition hardcoded in the ACPI SLIC table of the target PC.

@@ -6,6 +6,8 @@
 //  Copyright © 2023 TechUnRestricted. All rights reserved.
 //
 
+#import <CommonCrypto/CommonDigest.h>
+
 #import "NSFileManager+Common.h"
 #import "LocalizedStrings.h"
 #import "HelperFunctions.h"
@@ -456,6 +458,48 @@ static void initializeStaticVariables() {
             doubleBytes,
             [units objectAtIndex:unitPosition]
     ];
+}
+
+// Fix for TechUnRestricted/windiskwriter#75 and #29: written files are verified
+// after the copy loop, so an unexpected disconnect or a read-only mount shows
+// up as a verification failure instead of a silent broken installer.
++ (NSString * _Nullable)sha256ForFileAtPath: (NSString * _Nonnull)path {
+    NSFileHandle *fileHandle = [NSFileHandle fileHandleForReadingAtPath: path];
+    if (fileHandle == NULL) {
+        return NULL;
+    }
+
+    CC_SHA256_CTX sha256Context;
+    CC_SHA256_Init(&sha256Context);
+
+    const uint64_t bufferSize = 8 * 1024 * 1024;
+    void *buffer = malloc(bufferSize);
+    if (buffer == NULL) {
+        [fileHandle closeFile];
+        return NULL;
+    }
+
+    while (true) {
+        NSData *chunk = [fileHandle readDataOfLength: bufferSize];
+        if (chunk.length == 0) {
+            break;
+        }
+
+        CC_SHA256_Update(&sha256Context, chunk.bytes, (CC_LONG)chunk.length);
+    }
+
+    free(buffer);
+    [fileHandle closeFile];
+
+    uint8_t digest[CC_SHA256_DIGEST_LENGTH];
+    CC_SHA256_Final(digest, &sha256Context);
+
+    NSMutableString *hashString = [NSMutableString stringWithCapacity: CC_SHA256_DIGEST_LENGTH * 2];
+    for (int i = 0; i < CC_SHA256_DIGEST_LENGTH; i++) {
+        [hashString appendFormat: @"%02x", digest[i]];
+    }
+
+    return hashString;
 }
 
 @end

@@ -32,8 +32,10 @@ typedef NS_ENUM(NSUInteger, DWOperationType) {
      the types of all images inside install(.wim)/(.esd) to "Server" */
     DWOperationTypePatchWindowsInstallerRequirements,
     DWOperationTypeSetFilePermissions,
-    
-    DWOperationTypeInstallLegacyBootSector
+
+    DWOperationTypeInstallLegacyBootSector,
+
+    DWOperationTypeVerifyWrittenFiles
 };
 
 @interface DiskWriter: NSObject

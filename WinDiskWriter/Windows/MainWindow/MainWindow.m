@@ -48,47 +48,8 @@ if (self.isScheduledForStop) {        \
 WriteExitForce();                     \
 }
 
-// Rufus-parity (issue #71): expose the image SHA-256 before writing, so
+// Issue #71: log the image SHA-256 of the selected image before writing, so
 // corrupted or tampered ISOs (fake download sites) can be spotted in the log.
-static NSString * _Nullable sha256ForFileAtPath(NSString *path) {
-    NSFileHandle *fileHandle = [NSFileHandle fileHandleForReadingAtPath: path];
-    if (fileHandle == NULL) {
-        return NULL;
-    }
-
-    CC_SHA256_CTX sha256Context;
-    CC_SHA256_Init(&sha256Context);
-
-    const uint64_t bufferSize = 8 * 1024 * 1024;
-    void *buffer = malloc(bufferSize);
-    if (buffer == NULL) {
-        [fileHandle closeFile];
-        return NULL;
-    }
-
-    while (true) {
-        NSData *chunk = [fileHandle readDataOfLength: bufferSize];
-        if (chunk.length == 0) {
-            break;
-        }
-
-        CC_SHA256_Update(&sha256Context, chunk.bytes, (CC_LONG)chunk.length);
-    }
-
-    free(buffer);
-    [fileHandle closeFile];
-
-    uint8_t digest[CC_SHA256_DIGEST_LENGTH];
-    CC_SHA256_Final(digest, &sha256Context);
-
-    NSMutableString *hashString = [NSMutableString stringWithCapacity: CC_SHA256_DIGEST_LENGTH * 2];
-    for (int i = 0; i < CC_SHA256_DIGEST_LENGTH; i++) {
-        [hashString appendFormat: @"%02x", digest[i]];
-    }
-
-    return hashString;
-}
-
 @implementation MainWindow {
     /* Initialized in -setupViews: */
     TextInputView *windowsImageInputView;
@@ -942,11 +903,11 @@ static NSString * _Nullable sha256ForFileAtPath(NSString *path) {
     NSString *imageFilePath = [windowsImageInputView.stringValue copy];
 
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-        // Rufus-parity: log the image SHA-256 so corrupted or tampered ISOs are
+        // Issue #71: log the image SHA-256 so corrupted or tampered ISOs are
         // caught before they end up on the drive.
         [self->logsView appendRow: [LocalizedStrings logviewRowTitleComputingImageChecksum] logType: ASLogTypeLog];
 
-        NSString *imageChecksum = sha256ForFileAtPath(imageFilePath);
+        NSString *imageChecksum = [HelperFunctions sha256ForFileAtPath: imageFilePath];
         if (imageChecksum != NULL) {
             [self->logsView appendRow: [LocalizedStrings logviewRowTitleImageChecksumWithArgument1: imageChecksum]
                               logType: ASLogTypeLog];
@@ -1103,6 +1064,9 @@ static NSString * _Nullable sha256ForFileAtPath(NSString *path) {
                     break;
                 case DWOperationTypeInstallLegacyBootSector:
                     [onscreenLogText appendString: [LocalizedStrings progressTitleInstallLegacyBootloader]];
+                    break;
+                case DWOperationTypeVerifyWrittenFiles:
+                    [onscreenLogText appendString: [LocalizedStrings progressTitleVerifyWrittenFiles]];
                     break;
             }
             
