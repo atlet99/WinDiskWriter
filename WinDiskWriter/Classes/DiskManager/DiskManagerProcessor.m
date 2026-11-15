@@ -199,6 +199,16 @@ void daDiskCallback(DADiskRef disk, DADissenterRef dissenter, void *context) {
 }
 
 // TODO: Merge base logic [diskUtilEraseVolumeWithFilesystem + diskUtilEraseDiskWithPartitionScheme]
+
+// Fix for TechUnRestricted/windiskwriter#57: diskutil erase may fail with
+// -69888 ("Couldn't unmount disk") when something still holds the volume —
+// force-unmount the whole disk first so erase starts from a clean state.
+- (void)forceUnmountDiskForBSDName: (NSString *)bsdName {
+    [CommandLine execute: @"/usr/sbin/diskutil"
+               arguments: @[@"unmountDisk", @"force", bsdName]
+               exception: NULL];
+}
+
 - (BOOL)diskUtilEraseVolumeWithFilesystem: (Filesystem)filesystem
                                   newName: (NSString * _Nullable)newName
                                     error: (NSError *_Nullable *_Nullable)error {
@@ -218,7 +228,9 @@ void daDiskCallback(DADiskRef disk, DADissenterRef dissenter, void *context) {
         
         return NO;
     }
-    
+
+    [self forceUnmountDiskForBSDName: diskInfo.BSDName];
+
     NSException *eraseVolumeException = NULL;
     CommandLineData *commandLineData = [CommandLine execute: @"/usr/sbin/diskutil"
                                                   arguments: @[@"eraseVolume",
@@ -277,7 +289,9 @@ void daDiskCallback(DADiskRef disk, DADissenterRef dissenter, void *context) {
         
         return NO;
     }
-    
+
+    [self forceUnmountDiskForBSDName: diskInfo.BSDName];
+
     NSException *eraseVolumeException = NULL;
     CommandLineData *commandLineData = [CommandLine execute: @"/usr/sbin/diskutil"
                                                   arguments: @[@"eraseDisk",
