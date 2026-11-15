@@ -760,4 +760,39 @@ static void initializeStaticVariables() {
     });
 }
 
+// UEFI Shell releases are tagged on GitHub ("26H2" = edk2-stable202608) with
+// assets named "UEFI-Shell-<ver>-<tag>-RELEASE.iso".
++ (NSString * _Nullable)downloadUEFIShellISOWithError: (NSError *_Nullable *_Nullable)error {
+    NSString *releaseTag = @"26H2";
+    NSString *shellVersion = @"2.2";
+
+    NSURL *downloadURL = [NSURL URLWithString: [NSString stringWithFormat:
+        @"https://github.com/pbatard/UEFI-Shell/releases/download/%@/UEFI-Shell-%@-%@-RELEASE.iso",
+        releaseTag, shellVersion, releaseTag]];
+
+    NSString *destinationPath = [NSHomeDirectory() stringByAppendingPathComponent:
+                                 [@"Downloads" stringByAppendingPathComponent: downloadURL.lastPathComponent]];
+
+    SimpleDownloadManager *downloadManager = [[SimpleDownloadManager alloc] initWithSourceURL: downloadURL
+                                                                              destinationPath: destinationPath
+                                                                            temporaryFilePath: [destinationPath stringByAppendingString: @".part"]];
+
+    __block BOOL downloadSuccessful = YES;
+    [downloadManager downloadFileSynchronouslyWithCallback: ^BOOL(SDMMessage message, SDMMessageType messageType, void *SDMCallbackStruct, NSError *downloadError) {
+        if (message == SDMMessageDidFailWithError || messageType == SDMMessageTypeFailure) {
+            downloadSuccessful = NO;
+
+            if (error) {
+                *error = downloadError ?: [NSError errorWithStringValue: @"Download failed"];
+            }
+
+            return NO;
+        }
+
+        return YES;
+    }];
+
+    return downloadSuccessful ? destinationPath : NULL;
+}
+
 @end

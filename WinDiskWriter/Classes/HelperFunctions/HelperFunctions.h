@@ -80,6 +80,11 @@ typedef void(^MSISOCompletionCallback)(NSString * _Nullable downloadedISOPath, N
                                   statusCallback: (MSISOStatusCallback _Nonnull)statusCallback
                                       completion: (MSISOCompletionCallback _Nonnull)completion;
 
+// Synchronously downloads the current UEFI Shell 2.2 release ISO into
+// ~/Downloads and returns its path, or NULL with *error set. Call from a
+// background queue.
++ (NSString * _Nullable)downloadUEFIShellISOWithError: (NSError *_Nullable *_Nullable)error;
+
 @end
 
 NS_ASSUME_NONNULL_END
