@@ -18,6 +18,8 @@ NS_ASSUME_NONNULL_BEGIN
 /// @brief Stop Writing
 + (NSString *)alertButtonTitleStopWriting;
 
++ (NSString *)alertButtonTitleRetryOperation;
+
 /// @brief Do not forget to properly remove the device to avoid data corruption.
 + (NSString *)alertSubtitleImageWritingSuccess;
 

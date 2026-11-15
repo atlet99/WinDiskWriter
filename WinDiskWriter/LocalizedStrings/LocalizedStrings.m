@@ -18,6 +18,10 @@
     return NSLocalizedString(@"ALERT_BUTTON_TITLE_STOP_WRITING", NULL);
 }
 
++ (NSString *)alertButtonTitleRetryOperation {
+    return NSLocalizedString(@"ALERT_BUTTON_TITLE_RETRY_OPERATION", NULL);
+}
+
 + (NSString *)alertSubtitleImageWritingSuccess {
     return NSLocalizedString(@"ALERT_SUBTITLE_IMAGE_WRITING_SUCCESS", NULL);
 }

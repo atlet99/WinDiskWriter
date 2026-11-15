@@ -4,6 +4,7 @@
 
 
 "ALERT_BUTTON_TITLE_STOP_WRITING" = "Остановить запись";
+"ALERT_BUTTON_TITLE_RETRY_OPERATION" = "Повторить";
 
 
 "ALERT_SUBTITLE_IMAGE_WRITING_SUCCESS" = "Не забудьте правильно извлечь устройство, чтобы избежать повреждения данных.";

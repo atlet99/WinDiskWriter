@@ -4,6 +4,7 @@
 
 
 "ALERT_BUTTON_TITLE_STOP_WRITING" = "Stop Writing";
+"ALERT_BUTTON_TITLE_RETRY_OPERATION" = "Retry";
 
 
 "ALERT_SUBTITLE_IMAGE_WRITING_SUCCESS" = "Do not forget to properly remove the device to avoid data corruption.";

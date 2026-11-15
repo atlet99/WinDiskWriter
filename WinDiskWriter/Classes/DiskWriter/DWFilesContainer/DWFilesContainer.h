@@ -18,7 +18,8 @@ typedef NS_ENUM(NSUInteger, DWFilesContainerMessage) {
 typedef NS_ENUM(NSUInteger, DWAction) {
     DWActionContinue,
     DWActionSkip,
-    DWActionStop
+    DWActionStop,
+    DWActionRetry
 };
 
 typedef enum DWAction (^DWFilesContainerCallback)(DWFile *_Nonnull fileInfo, enum DWFilesContainerMessage message);

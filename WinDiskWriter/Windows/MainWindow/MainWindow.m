@@ -1265,6 +1265,7 @@ WriteExitForce();                     \
                     
                     [alert addButtonWithTitle: [LocalizedStrings alertButtonTitleStopWriting]];
                     [alert addButtonWithTitle: [LocalizedStrings alertButtonTitleSkipFile]];
+                    [alert addButtonWithTitle: [LocalizedStrings alertButtonTitleRetryOperation]];
                     
                     [alert setIcon: [NSImage imageNamed: NSImageNameCaution]];
                     
@@ -1279,8 +1280,10 @@ WriteExitForce();                     \
                 
                 if (synchronizedAlertData.resultCode == NSAlertFirstButtonReturn) {
                     [self setIsScheduledForStop: YES];
-                    
+
                     return DWActionStop;
+                } else if (synchronizedAlertData.resultCode == NSAlertThirdButtonReturn) {
+                    return DWActionRetry;
                 } else {
                     return DWActionSkip;
                 }

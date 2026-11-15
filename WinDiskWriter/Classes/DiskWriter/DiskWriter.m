@@ -579,6 +579,8 @@ case DWActionStop:                                                              
 return NO;                                                                                    \
 case DWActionSkip:                                                                            \
 continue;                                                                                     \
+case DWActionRetry:                                                                           \
+break; /* retriable operations wrap their own retry loops */                                  \
 }
 
 if (![self commonErrorCheckerWithError:error]) {
@@ -616,16 +618,18 @@ if (![self commonErrorCheckerWithError:error]) {
                 installerWIMPackageFile = currentFile;
                 
                 __block DWAction lastAction = DWActionContinue;
-                
-                [self writeWindowsInstallWithDWFile: currentFile
-                                    destinationPath: absoluteDestinationPath
-                                           callback: ^DWAction(DWFile * _Nonnull dwFile, uint64 copiedBytes, DWOperationType operationType, DWOperationResult operationResult, NSError * _Nonnull error) {
-                    
-                    lastAction = progressCallback(dwFile, copiedBytes, operationType, operationResult, error);
-                    
-                    return lastAction;
-                }];
-                
+
+                do {
+                    [self writeWindowsInstallWithDWFile: currentFile
+                                        destinationPath: absoluteDestinationPath
+                                               callback: ^DWAction(DWFile * _Nonnull dwFile, uint64 copiedBytes, DWOperationType operationType, DWOperationResult operationResult, NSError * _Nonnull error) {
+
+                        lastAction = progressCallback(dwFile, copiedBytes, operationType, operationResult, error);
+
+                        return lastAction;
+                    }];
+                } while (lastAction == DWActionRetry);
+
                 if (lastAction == DWActionStop) {
                     return NO;
                 }
@@ -642,18 +646,22 @@ if (![self commonErrorCheckerWithError:error]) {
                 }
                 
                 __block DWAction lastAction = DWActionContinue;
-                
-                BOOL copyingWasSuccessfull = [self copyFileWithDWFile: currentFile
+
+                BOOL copyingWasSuccessfull = NO;
+
+                do {
+                    copyingWasSuccessfull = [self copyFileWithDWFile: currentFile
                                                   destinationFilePath: absoluteDestinationPath
                                                            bufferSize: COPY_BUFFER_SIZE
                                                 ignoreFilesystemCheck: NO
                                                              callback: ^DWAction(DWFile * _Nonnull dwFile, uint64 copiedBytes, DWOperationType operationType, DWOperationResult operationResult, NSError * _Nonnull error) {
-                    
-                    lastAction = progressCallback(dwFile, copiedBytes, operationType, operationResult, error);
-                    
-                    return lastAction;
-                }];
-                
+
+                        lastAction = progressCallback(dwFile, copiedBytes, operationType, operationResult, error);
+
+                        return lastAction;
+                    }];
+                } while (lastAction == DWActionRetry);
+
                 if (lastAction == DWActionStop) {
                     return NO;
                 }
@@ -669,100 +677,79 @@ if (![self commonErrorCheckerWithError:error]) {
     // All file sizes are checked, plus the install image (or the largest file)
     // gets a full SHA-256 comparison.
     DWFile *verificationAnchorFile = self.filesContainer.files.firstObject;
-    if (verificationAnchorFile != NULL) {
-        switch (progressCallback(verificationAnchorFile, 0, DWOperationTypeVerifyWrittenFiles, DWOperationResultStart, NULL)) {
-            case DWActionStop:
-                return NO;
-            case DWActionSkip:
-            case DWActionContinue:
-                break;
-        }
 
+    if (verificationAnchorFile != NULL) {
         // Note: the size sweep is instant, but the final hash comparison cannot
         // be interrupted — worst case it delays a Stop request by one file hash.
-        BOOL verificationPassed = YES;
-        NSError *verificationError = NULL;
-        DWFile *hashCheckFile = installerWIMPackageFile;
+        BOOL verificationRetryRequested = NO;
 
-        for (DWFile *currentFile in [self.filesContainer files]) {
-            // A directory has no meaningful "size": it differs between the
-            // source filesystem (UDF/ISO) and FAT32, and says nothing about
-            // whether its contents were written correctly.
-            if (currentFile.fileType == NSFileTypeDirectory) {
-                continue;
+        do {
+            verificationRetryRequested = NO;
+
+            switch (progressCallback(verificationAnchorFile, 0, DWOperationTypeVerifyWrittenFiles, DWOperationResultStart, NULL)) {
+                case DWActionStop:
+                    return NO;
+                case DWActionSkip:
+                case DWActionContinue:
+                case DWActionRetry:
+                    break;
             }
 
-            // The patched boot.wim intentionally diverges from the source image
-            // (Autounattend.xml injected), so source-based checks do not apply.
-            if (self.patchInstallerRequirements && [currentFile.sourcePath.lowercaseString isEqualToString: @"sources/boot.wim"]) {
-                continue;
-            }
+            BOOL verificationPassed = YES;
+            NSError *verificationError = NULL;
+            DWFile *hashCheckFile = installerWIMPackageFile;
 
-            NSString *absoluteDestinationFilePath = [self.destinationPath stringByAppendingPathComponent: currentFile.sourcePath];
-            NSDictionary *destinationFileAttributes = [localFileManager attributesOfItemAtPath: absoluteDestinationFilePath
-                                                                                         error: NULL];
-
-            if (destinationFileAttributes == NULL || destinationFileAttributes.fileSize != currentFile.size) {
-                verificationPassed = NO;
-                verificationError = [NSError errorWithStringValue: [LocalizedStrings errorTextWrittenFileVerificationFailureWithArgument1: currentFile.sourcePath]];
-
-                break;
-            }
-
-            if (hashCheckFile == NULL || currentFile.size > hashCheckFile.size) {
-                hashCheckFile = currentFile;
-            }
-        }
-
-        if (verificationPassed && hashCheckFile != NULL) {
-            NSString *sourceHash = [HelperFunctions sha256ForFileAtPath: [self.filesContainer.containerPath stringByAppendingPathComponent: hashCheckFile.sourcePath]];
-            NSString *destinationHash = [HelperFunctions sha256ForFileAtPath: [self.destinationPath stringByAppendingPathComponent: hashCheckFile.sourcePath]];
-
-            if (sourceHash == NULL || destinationHash == NULL || ![sourceHash isEqualToString: destinationHash]) {
-                verificationPassed = NO;
-                verificationError = [NSError errorWithStringValue: [LocalizedStrings errorTextWrittenFileVerificationFailureWithArgument1: hashCheckFile.sourcePath]];
-            }
-        }
-
-        switch (progressCallback(verificationAnchorFile, 0, DWOperationTypeVerifyWrittenFiles, (verificationPassed ? DWOperationResultSuccess : DWOperationResultFailure), verificationError)) {
-            case DWActionStop:
-                return NO;
-            case DWActionSkip:
-            case DWActionContinue:
-                break;
-        }
-    }
-
-    // Fix for TechUnRestricted/windiskwriter#54 and #32, with the disable-BitLocker
-    // and privacy toggles: inject a windowsPE/oobeSystem Autounattend.xml into the
-    // written sources/boot.wim (Setup image, index 2; index 1 as a fallback for
-    // unofficial ISOs) so Windows Setup applies the configured options itself.
-    if (self.patchInstallerRequirements || self.disableBitLockerEncryption || self.disableDataCollection) {
-        NSString *destinationBootWimPath = [self.destinationPath stringByAppendingPathComponent: @"sources/boot.wim"];
-
-        if ([localFileManager fileExistsAtPath: destinationBootWimPath]) {
-            NSString *tempUnattendPath = [NSTemporaryDirectory() stringByAppendingPathComponent: @"WDW-Autounattend.xml"];
-
-            NSString *bypassUnattendXML = [DiskWriter autounattendXMLWithHardwareBypass: self.patchInstallerRequirements
-                                                                    disableBitLocker: self.disableBitLockerEncryption
-                                                               disableDataCollection: self.disableDataCollection];
-
-            if (bypassUnattendXML != NULL && [bypassUnattendXML writeToFile: tempUnattendPath atomically: YES encoding: NSUTF8StringEncoding error: NULL]) {
-                WimlibWrapper *bootWimWrapper = [[WimlibWrapper alloc] initWithWimPath: destinationBootWimPath];
-
-                WimlibWrapperResult injectionResult = [bootWimWrapper addFileAtPath: tempUnattendPath
-                                                                     toImageAtIndex: 2
-                                                                        asImagePath: @"/Autounattend.xml"];
-
-                if (injectionResult != WimlibWrapperResultSuccess) {
-                    injectionResult = [bootWimWrapper addFileAtPath: tempUnattendPath
-                                                     toImageAtIndex: 1
-                                                        asImagePath: @"/Autounattend.xml"];
+            for (DWFile *currentFile in [self.filesContainer files]) {
+                // A directory has no meaningful "size": it differs between the
+                // source filesystem (UDF/ISO) and FAT32, and says nothing about
+                // whether its contents were written correctly.
+                if (currentFile.fileType == NSFileTypeDirectory) {
+                    continue;
                 }
 
-                [[NSFileManager defaultManager] removeItemAtPath: tempUnattendPath error: NULL];
+                // The patched boot.wim intentionally diverges from the source image
+                // (Autounattend.xml injected), so source-based checks do not apply.
+                if (self.patchInstallerRequirements && [currentFile.sourcePath.lowercaseString isEqualToString: @"sources/boot.wim"]) {
+                    continue;
+                }
+
+                NSString *absoluteDestinationFilePath = [self.destinationPath stringByAppendingPathComponent: currentFile.sourcePath];
+                NSDictionary *destinationFileAttributes = [localFileManager attributesOfItemAtPath: absoluteDestinationFilePath
+                                                                                             error: NULL];
+
+                if (destinationFileAttributes == NULL || destinationFileAttributes.fileSize != currentFile.size) {
+                    verificationPassed = NO;
+                    verificationError = [NSError errorWithStringValue: [LocalizedStrings errorTextWrittenFileVerificationFailureWithArgument1: currentFile.sourcePath]];
+
+                    break;
+                }
+
+                if (hashCheckFile == NULL || currentFile.size > hashCheckFile.size) {
+                    hashCheckFile = currentFile;
+                }
             }
-        }
+
+            if (verificationPassed && hashCheckFile != NULL) {
+                NSString *sourceHash = [HelperFunctions sha256ForFileAtPath: [self.filesContainer.containerPath stringByAppendingPathComponent: hashCheckFile.sourcePath]];
+                NSString *destinationHash = [HelperFunctions sha256ForFileAtPath: [self.destinationPath stringByAppendingPathComponent: hashCheckFile.sourcePath]];
+
+                if (sourceHash == NULL || destinationHash == NULL || ![sourceHash isEqualToString: destinationHash]) {
+                    verificationPassed = NO;
+                    verificationError = [NSError errorWithStringValue: [LocalizedStrings errorTextWrittenFileVerificationFailureWithArgument1: hashCheckFile.sourcePath]];
+                }
+            }
+
+            switch (progressCallback(verificationAnchorFile, 0, DWOperationTypeVerifyWrittenFiles, (verificationPassed ? DWOperationResultSuccess : DWOperationResultFailure), verificationError)) {
+                case DWActionStop:
+                    return NO;
+                case DWActionRetry:
+                    verificationRetryRequested = YES;
+                    break;
+                case DWActionSkip:
+                case DWActionContinue:
+                    break;
+            }
+        } while (verificationRetryRequested);
     }
     // Fix for TechUnRestricted/windiskwriter#64 and #2: an ei.cfg with an empty
     // EditionID makes Windows Setup show the edition picker instead of silently
