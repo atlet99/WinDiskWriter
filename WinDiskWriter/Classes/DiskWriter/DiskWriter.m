@@ -679,6 +679,13 @@ if (![self commonErrorCheckerWithError:error]) {
         DWFile *hashCheckFile = installerWIMPackageFile;
 
         for (DWFile *currentFile in [self.filesContainer files]) {
+            // A directory has no meaningful "size": it differs between the
+            // source filesystem (UDF/ISO) and FAT32, and says nothing about
+            // whether its contents were written correctly.
+            if (currentFile.fileType == NSFileTypeDirectory) {
+                continue;
+            }
+
             NSString *absoluteDestinationFilePath = [self.destinationPath stringByAppendingPathComponent: currentFile.sourcePath];
             NSDictionary *destinationFileAttributes = [localFileManager attributesOfItemAtPath: absoluteDestinationFilePath
                                                                                          error: NULL];
