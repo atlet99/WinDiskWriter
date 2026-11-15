@@ -205,6 +205,12 @@ NS_ASSUME_NONNULL_BEGIN
 
 + (NSString *)checkboxviewTooltipSkipOnlineAccount;
 
++ (NSString *)logviewRowTitleComputingImageChecksum;
+
++ (NSString *)logviewRowTitleImageChecksumWithArgument1:(id)argument1;
+
++ (NSString *)logviewRowTitleImageChecksumFailure;
+
 /// @brief Add support for older firmwares that don't support booting from EFI.
 + (NSString *)checkboxviewTooltipInstallLegacyBootSector;
 

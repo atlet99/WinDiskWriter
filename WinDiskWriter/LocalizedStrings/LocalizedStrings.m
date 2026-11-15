@@ -275,6 +275,19 @@
     return NSLocalizedString(@"CHECKBOXVIEW_TOOLTIP_SKIP_ONLINE_ACCOUNT", NULL);
 }
 
++ (NSString *)logviewRowTitleComputingImageChecksum {
+    return NSLocalizedString(@"LOGVIEW_ROW_TITLE_COMPUTING_IMAGE_CHECKSUM", NULL);
+}
+
++ (NSString *)logviewRowTitleImageChecksumWithArgument1:(id)argument1 {
+    NSString *unformattedString = NSLocalizedString(@"LOGVIEW_ROW_TITLE_IMAGE_CHECKSUM", NULL);
+    return [NSString stringWithFormat: unformattedString, argument1];
+}
+
++ (NSString *)logviewRowTitleImageChecksumFailure {
+    return NSLocalizedString(@"LOGVIEW_ROW_TITLE_IMAGE_CHECKSUM_FAILURE", NULL);
+}
+
 + (NSString *)checkboxviewTooltipInstallLegacyBootSector {
     return NSLocalizedString(@"CHECKBOXVIEW_TOOLTIP_INSTALL_LEGACY_BOOT_SECTOR", NULL);
 }
