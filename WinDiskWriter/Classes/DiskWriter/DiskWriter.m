@@ -401,7 +401,12 @@ goto cleanup;                                                                   
         }
         
     } else {
-        if (![sourcePath.lowercaseString.pathExtension isEqualToString:@"wim"]) {
+        // Fix for TechUnRestricted/windiskwriter#36: an .esd is still a WIM
+        // container (ESD-compressed), and wimlib splits it just like a plain
+        // .wim — Windows Setup accepts the resulting install.swm the same way.
+        // Only already-split .swm input is unsupported (re-splitting needs a merge).
+        if (![sourcePath.lowercaseString.pathExtension isEqualToString:@"wim"] &&
+            ![sourcePath.lowercaseString.pathExtension isEqualToString:@"esd"]) {
             NSError *error = [NSError errorWithStringValue: [LocalizedStrings errorTextSplittingEsdSwmNotSupported]];
             
             CallbackHandlerWithCleanup(dwFile, 0, DWOperationTypeSplitWindowsImage, DWOperationResultFailure, error);

@@ -359,7 +359,7 @@
 "ERROR_TEXT_SPECIFIED_BSD_NAME_DOESNT_EXIST_CANT_ERASE" = "Указанное BSD имя не существует. Невозможно стереть данный раздел.";
 
 
-"ERROR_TEXT_SPLITTING_ESD_SWM_NOT_SUPPORTED" = "Разделение установочных файлов Windows с расширениями .esd и .swm на данный момент недоступно.";
+"ERROR_TEXT_SPLITTING_ESD_SWM_NOT_SUPPORTED" = "Разделение установочных образов Windows с расширением .swm на данный момент недоступно (используйте образ .wim или .esd).";
 
 
 "ERROR_TEXT_UNMOUNT_DESTINATION_DEVICE_FAILURE" = "Не удалось размонтировать устройство назначения.";

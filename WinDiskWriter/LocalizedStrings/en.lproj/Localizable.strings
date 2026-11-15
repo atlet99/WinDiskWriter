@@ -359,7 +359,7 @@
 "ERROR_TEXT_SPECIFIED_BSD_NAME_DOESNT_EXIST_CANT_ERASE" = "Specified BSD name does not exist. Can't erase this volume.";
 
 
-"ERROR_TEXT_SPLITTING_ESD_SWM_NOT_SUPPORTED" = "Splitting Windows Install Images with .esd and .swm extensions is currently not supported.";
+"ERROR_TEXT_SPLITTING_ESD_SWM_NOT_SUPPORTED" = "Splitting Windows Install Images with a .swm extension is currently not supported (use a .wim or .esd image).";
 
 
 "ERROR_TEXT_UNMOUNT_DESTINATION_DEVICE_FAILURE" = "Can't unmount the destination device";
