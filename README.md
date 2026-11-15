@@ -210,10 +210,11 @@ With this USB drive, you can install and enjoy <strong>Windows</strong> on your 
         </tr>
         <tr>
             <td>Mac OS X Mountain Lion 10.8</td>
+            <td align="center">Yes</td>
         </tr>
         <tr>
             <td>Mac OS X Lion 10.7</td>
-          <td rowspan="2" align="center">
+            <td rowspan="2" align="center">
               Not Yet<br>
               <sub>(but it should work!)</sub>
             </td>
