@@ -889,7 +889,7 @@ WriteExitForce();                     \
                     logType: ASLogTypeLog];
         
         [self setCurrentProgressTitle: [LocalizedStrings progressTitleFormattingTheDrive]];
-        
+
         NSError *diskEraseError = NULL;
         [secondVerifyingStageDiskManager diskUtilEraseDiskWithPartitionScheme: selectedPartitionScheme
                                                                    filesystem: selectedFileSystem
@@ -914,7 +914,26 @@ WriteExitForce();                     \
                           logType: ASLogTypeSuccess];
         
         WriteExitConditionally();
-        
+
+        // Fix for TechUnRestricted/windiskwriter#44 and #27: after eraseDisk the
+        // volume is not guaranteed to be mounted at /Volumes/<name> instantly, and
+        // a mount-time name collision yields e.g. "NAME 1" — wait for the mount
+        // and fall back to the real mountpoint reported by DiskArbitration.
+        NSString *targetPartitionPath = [NSString stringWithFormat: @"/Volumes/%@", newPartitionName];
+        NSDate *mountDeadline = [NSDate dateWithTimeIntervalSinceNow: 10.0];
+
+        while (![NSFileManager.defaultManager fileExistsAtPath: targetPartitionPath] && [mountDeadline timeIntervalSinceNow] > 0.0) {
+            [NSThread sleepForTimeInterval: 0.2];
+        }
+
+        if (![NSFileManager.defaultManager fileExistsAtPath: targetPartitionPath]) {
+            NSString *actualVolumePath = [secondVerifyingStageDiskManager diskInfo].volumePath;
+
+            if (actualVolumePath != NULL) {
+                targetPartitionPath = actualVolumePath;
+            }
+        }
+
         DWFilesContainer *filesContainer = [DWFilesContainer containerFromContainerPath: mountedImagePath
                                                                                callback: ^enum DWAction(DWFile * _Nonnull fileInfo, enum DWFilesContainerMessage message) {
             if (self.isScheduledForStop) {
